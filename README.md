@@ -4,16 +4,19 @@
 
 ## Результаты
 
-На выборке из 7 Telegram-каналов (1500 постов):
+На выборке из 5 Telegram-каналов (1500 постов):
 
 | Метрика | Значение |
 |---|---|
 | Постов после фильтра дайджестов | 1168 |
 | Кластеров (событий) | 669 |
 | Дублей убрано | 499 (43%) |
-| Pairwise F1 (214 размеченных пар) | **0.978** |
-| Pairwise Precision | 0.957 |
-| Pairwise Recall | 1.000 |
+| Pairwise F1 — train (149 пар) | **0.966** |
+| Pairwise F1 — held-out (65 пар) | **1.000** |
+| Pairwise Precision (held-out) | 1.000 |
+| Pairwise Recall (held-out) | 1.000 |
+
+Tau=0.75 откалиброван на 70% пар (149), проверен на held-out 30% (65 пар, 8 позитивных). Разметка: `scripts/calibrate_tau.py --test-ratio 0.3`.
 
 ## Подход
 
@@ -45,14 +48,14 @@ Telegram-каналы → Ingest (Telethon → SQLite)
 
 **Кластеризация: connected components** — вместо K-means (не знаем число кластеров) и DBSCAN (O(n²) на 100k). FAISS ANN граф + union-find: O(n·k) память, инкрементальное пополнение.
 
-**Порог tau=0.75** откалиброван на размеченных парах по pairwise F1:
+**Порог tau=0.75** откалиброван на train-части (149 пар) по pairwise F1:
 
-| tau | F1 | P | R |
+| tau | F1 (train) | P | R |
 |---|---|---|---|
-| 0.70 | 0.917 | 0.846 | 1.000 |
-| **0.75** | **0.978** | **0.957** | **1.000** |
-| 0.80 | 0.977 | 1.000 | 0.955 |
-| 0.85 | 0.667 | 1.000 | 0.500 |
+| 0.70 | 0.875 | 0.778 | 1.000 |
+| **0.75** | **0.966** | **0.933** | **1.000** |
+| 0.80 | 0.963 | 1.000 | 0.929 |
+| 0.83 | 0.667 | 1.000 | 0.500 |
 
 **Фильтр дайджестов** — удаляет сводки и радио-анонсы (regex + bullet-count), которые не являются новостями и создают ложные кластеры.
 
@@ -145,6 +148,21 @@ dedup:
 
 При n ≤ 50k используется `IndexFlatIP` (точный, стабильный); при n > 50k — `IndexHNSWFlat`.
 
+## Датасет
+
+Fixture: `tests/fixtures/news_sample.json`  
+SHA-256: `af1a470fd14fe85e0c62169ef556b0001549ba7532791f3f45eb7868c9770a60`  
+Скрейп: 2026-06-18, по 300 постов на канал
+
+| Канал | Постов |
+|---|---|
+| @interfaxonline | 300 |
+| @kommersant | 300 |
+| @rbc_news | 300 |
+| @tass_agency | 300 |
+| @vedomosti | 300 |
+| **Итого** | **1500** |
+
 ## Структура
 
 ```
@@ -152,20 +170,22 @@ ingest/
   store.py          SQLite: схема, upsert, checkpoint
   telegram.py       Telethon MTProto → SQLite (инкрементально)
 dedup/
-  text.py           clean(), word_tokens()
+  text.py           clean(), word_tokens(), is_digest()
   prefilter.py      MinHash/LSH лексический пре-фильтр
   embed.py          sentence-transformers → L2-norm
   cluster.py        FAISS ANN + build_edges + connected_clusters + canonical
   eval.py           pairwise P/R/F1, ARI, cluster_size_stats
   pipeline.py       оркестратор + вывод
 scripts/
-  scrape_fixture.py t.me/s/<channel> без авторизации
-  label_pairs.py    интерактивная разметка пар
-  calibrate_tau.py  grid search косинусного порога
+  scrape_fixture.py       t.me/s/<channel> без авторизации
+  label_pairs.py          интерактивная разметка пар
+  calibrate_tau.py        grid search косинусного порога (с held-out split)
+  audit_digest_filter.py  интерактивный аудит FP-rate digest-фильтра
 tests/
-  test_smoke.py     offline unit-тесты (F1=1.0, time window)
+  test_smoke.py           offline unit-тесты (F1=1.0, time window, lexical boilerplate)
+  test_integration.py     integration-тесты с реальной моделью (pytest -m integration)
   fixtures/
-    news_sample.json      1500 постов, 7 каналов
+    news_sample.json      1500 постов, 5 каналов
     labeled_pairs.json    214 размеченных пар
 config.yaml         пороги, каналы, параметры модели
 ```

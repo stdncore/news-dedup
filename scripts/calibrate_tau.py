@@ -29,24 +29,10 @@ DEFAULT_TAUS = [0.70, 0.75, 0.80, 0.83, 0.85, 0.87, 0.90, 0.92, 0.95]
 
 
 def load_fixture_filtered(path: Path) -> list[dict]:
-    import re
-
-    _DIGEST_MARKERS = re.compile(
-        r"главные новости|кратко:|дайджест|итоги дня|важное за|что случилось"
-        r"|больше новостей к этому часу|прямо сейчас в эфире|в программе «|слушайте в эфире",
-        flags=re.IGNORECASE,
-    )
-    _BULLET_RE = re.compile(r"[▪•▸►\-🟢🔴🔵🟡]\s?")
-
-    def _is_digest(text: str) -> bool:
-        if _DIGEST_MARKERS.search(text):
-            return True
-        if len(_BULLET_RE.findall(text)) >= 3 and len(text) > 250:
-            return True
-        return False
+    from dedup.text import is_digest
 
     posts = json.loads(path.read_text(encoding="utf-8"))
-    return [p for p in posts if not _is_digest(p.get("text", ""))]
+    return [p for p in posts if not is_digest(p.get("text", ""))]
 
 
 def get_embeddings(posts: list[dict], cfg: dict) -> np.ndarray:
@@ -127,6 +113,8 @@ def main() -> None:
     ap.add_argument("--config", default=str(CONFIG))
     ap.add_argument("--fixture", default=str(FIXTURE))
     ap.add_argument("--labels", default=str(LABELS_FILE))
+    ap.add_argument("--test-ratio", type=float, default=0.3,
+                    help="Доля пар для held-out теста (0 = без split, все пары = train)")
     args = ap.parse_args()
 
     cfg = yaml.safe_load(Path(args.config).read_text(encoding="utf-8"))
@@ -138,6 +126,20 @@ def main() -> None:
     labeled = json.loads(Path(args.labels).read_text(encoding="utf-8"))
     n_dup = sum(r["label"] for r in labeled)
     print(f"Размеченных пар: {len(labeled)}  (дублей: {n_dup}, не-дублей: {len(labeled)-n_dup})")
+
+    if args.test_ratio > 0:
+        import random
+        rng = random.Random(dcfg.get("seed", 42))
+        shuffled = labeled[:]
+        rng.shuffle(shuffled)
+        split = int(len(shuffled) * (1 - args.test_ratio))
+        train_pairs = shuffled[:split]
+        test_pairs = shuffled[split:]
+        print(f"Train пар: {len(train_pairs)}, Test пар: {len(test_pairs)}")
+    else:
+        train_pairs = labeled
+        test_pairs = None
+        print("Split отключён (--test-ratio 0): все пары идут в train")
 
     id2pos = {p["id"]: i for i, p in enumerate(posts)}
 
@@ -163,12 +165,17 @@ def main() -> None:
     )
     print(f"ANN готов. Сетка tau: {args.taus}\n")
 
+    tw = dcfg.get("time_window_hours", 72)
+
+    # Grid search на train_pairs
     results = []
     for tau in args.taus:
-        r = eval_tau(tau, sims, idx, published, dcfg.get("time_window_hours", 72), id2pos, labeled)
+        r = eval_tau(tau, sims, idx, published, tw, id2pos, train_pairs)
         results.append(r)
 
-    print(f"{'tau':>6}  {'F1':>6}  {'P':>6}  {'R':>6}  {'TP':>4}  {'FP':>4}  {'FN':>4}  {'кластеров':>10}  {'рёбер':>7}")
+    header = f"{'tau':>6}  {'F1':>6}  {'P':>6}  {'R':>6}  {'TP':>4}  {'FP':>4}  {'FN':>4}  {'кластеров':>10}  {'рёбер':>7}"
+    print(f"\n--- TRAIN ({len(train_pairs)} пар) ---")
+    print(header)
     print("-" * 72)
     best = max(results, key=lambda r: r["f1"])
     for r in results:
@@ -178,8 +185,20 @@ def main() -> None:
             f"  {r['tp']:>4}  {r['fp']:>4}  {r['fn']:>4}  {r['n_clusters']:>10}  {r['n_edges']:>7}{marker}"
         )
 
-    print(f"\nЛучший tau = {best['tau']}  (F1={best['f1']:.3f})")
-    print(f"Обнови config.yaml: cosine_threshold: {best['tau']}")
+    print(f"\nЛучший tau на train = {best['tau']}  (F1={best['f1']:.3f})")
+
+    if test_pairs:
+        final = eval_tau(best["tau"], sims, idx, published, tw, id2pos, test_pairs)
+        print(f"\n--- HELD-OUT TEST ({len(test_pairs)} пар) ---")
+        print(header)
+        print("-" * 72)
+        print(
+            f"{final['tau']:>6.2f}  {final['f1']:>6.3f}  {final['precision']:>6.3f}  {final['recall']:>6.3f}"
+            f"  {final['tp']:>4}  {final['fp']:>4}  {final['fn']:>4}  {final['n_clusters']:>10}  {final['n_edges']:>7}"
+        )
+        print(f"\nФинальный (held-out) F1 = {final['f1']:.3f}  P={final['precision']:.3f}  R={final['recall']:.3f}")
+
+    print(f"\nОбнови config.yaml: cosine_threshold: {best['tau']}")
 
 
 if __name__ == "__main__":

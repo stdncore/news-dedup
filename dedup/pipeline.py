@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 from datetime import datetime
 
 import numpy as np
@@ -22,6 +21,7 @@ from .cluster import (
 )
 from .embed import build_embeddings
 from .prefilter import lexical_edges
+from .text import is_digest
 
 
 def load_news(db_path: str) -> pd.DataFrame:
@@ -39,21 +39,6 @@ def load_news(db_path: str) -> pd.DataFrame:
     return df.reset_index(drop=True)
 
 
-_DIGEST_MARKERS = re.compile(
-    r"главные новости|кратко:|дайджест|итоги дня|важное за|что случилось"
-    r"|больше новостей к этому часу|прямо сейчас в эфире|в программе «|слушайте в эфире",
-    flags=re.IGNORECASE,
-)
-_BULLET_RE = re.compile(r"[▪•▸►\-🟢🔴🔵🟡]\s?")
-
-
-def _is_digest(text: str) -> bool:
-    """True если пост — дайджест/сводка нескольких событий."""
-    if _DIGEST_MARKERS.search(text):
-        return True
-    if len(_BULLET_RE.findall(text)) >= 3 and len(text) > 250:
-        return True
-    return False
 
 
 def load_fixture(path: str) -> pd.DataFrame:
@@ -64,7 +49,7 @@ def load_fixture(path: str) -> pd.DataFrame:
     df["title"] = df["title"].fillna("")
     df["text"] = df["text"].fillna("")
     before = len(df)
-    df = df[~df["text"].apply(_is_digest)].reset_index(drop=True)
+    df = df[~df["text"].apply(is_digest)].reset_index(drop=True)
     print(f"Фильтр дайджестов: убрано {before - len(df)} постов, осталось {len(df)}")
     return df.sort_values("published_at").reset_index(drop=True)
 
@@ -126,6 +111,11 @@ def run(config: dict, df: pd.DataFrame | None = None, input_file: str | None = N
     print(f"Семантические рёбра: {len(sem)}")
 
     # 6) Компоненты связности.
+    # Lexical edges тоже фильтруем по времени: boilerplate-заголовки (ТАСС, Интерфакс)
+    # иначе склеят события, разнесённые на месяцы.
+    tw = cfg.get("time_window_hours", 72) * 3600.0
+    ts = [d.timestamp() for d in published]
+    lex = [(i, j) for i, j in lex if abs(ts[i] - ts[j]) <= tw]
     edges = sorted(set(lex) | set(sem))
     labels = connected_clusters(n, edges)
     df = df.copy()

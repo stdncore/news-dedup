@@ -74,7 +74,47 @@ def test_time_window_blocks_far_apart():
     assert len(set(labels.tolist())) == 2
 
 
+def test_lexical_edge_time_window_blocks_far_apart():
+    """Lexical (MinHash) ребро не должно выживать после time-window фильтра.
+
+    Boilerplate-заголовки ТАСС/Интерфакс дают высокий Jaccard между разными событиями.
+    Тест проверяет два условия отдельно:
+    1. MinHash действительно находит ребро (иначе тест бессмысленен).
+    2. Time-window фильтр в pipeline.run() его срезает (проверяем логику фильтра напрямую,
+       без FAISS/модели чтобы избежать OpenMP-краша на macOS ARM64).
+    """
+    from dedup.prefilter import lexical_edges
+
+    # Длинный boilerplate → высокий Jaccard между разными событиями.
+    # Конкретно: ~20 общих слов, ~5 уникальных → Jaccard 3-gram ≈ 0.60+
+    boilerplate = (
+        "москва тасс агентство сообщает что сегодня по данным официального источника "
+        "в пресс службе ведомства состоялось брифинг по итогам которого было объявлено "
+    )
+    texts = [
+        boilerplate + "принятие закона о государственном бюджете",
+        boilerplate + "открытие нового моста через реку волгу",
+    ]
+
+    # 1) MinHash должен найти ребро (низкий порог для надёжности теста)
+    lex = lexical_edges(texts, num_perm=128, jaccard_threshold=0.4, shingle_size=3)
+    assert len(lex) > 0, (
+        "MinHash не нашёл ребро между boilerplate-текстами — тест некорректен, снизь jaccard_threshold"
+    )
+
+    # 2) После time-window фильтра (72ч) ребро должно исчезнуть (разница 30 дней)
+    t0 = BASE.timestamp()
+    t1 = (BASE + timedelta(days=30)).timestamp()
+    tw = 72 * 3600.0
+    ts = [t0, t1]
+    filtered = [(i, j) for i, j in lex if abs(ts[i] - ts[j]) <= tw]
+    assert len(filtered) == 0, (
+        f"Time-window фильтр не срезал ребро: {filtered} (разница {(t1-t0)/3600:.0f}ч > {tw/3600:.0f}ч)"
+    )
+
+
 if __name__ == "__main__":
     test_clusters_and_metrics()
     test_time_window_blocks_far_apart()
+    test_lexical_edge_time_window_blocks_far_apart()
     print("all smoke tests passed")
