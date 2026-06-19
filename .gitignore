@@ -1,0 +1,25 @@
+# Секреты и сессии Telethon
+.env
+*.session
+*.session-journal
+
+# Данные/артефакты
+*.db
+clusters.json
+embeddings*.npy
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
+
+# Build artifacts
+*.egg-info/
+
+# Документы задания
+*.docx
+~$*.docx

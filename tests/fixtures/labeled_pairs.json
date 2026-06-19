@@ -1,0 +1,1500 @@
+[
+  {
+    "id1": "@rbc_news:151496",
+    "id2": "@vedomosti:79903",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381340",
+    "id2": "@kommersant:109684",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@rbc_news:151381",
+    "id2": "@kommersant:109588",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381399",
+    "id2": "@vedomosti:79905",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@rbc_news:151441",
+    "id2": "@vedomosti:79853",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@rbc_news:151409",
+    "id2": "@vedomosti:79808",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@kommersant:109655",
+    "id2": "@vedomosti:79848",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@rbc_news:151385",
+    "id2": "@vedomosti:79783",
+    "label": 1,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381352",
+    "id2": "@vedomosti:79891",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@kommersant:109589",
+    "id2": "@vedomosti:79781",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381309",
+    "id2": "@vedomosti:79865",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381353",
+    "id2": "@rbc_news:151482",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@rbc_news"
+  },
+  {
+    "id1": "@tass_agency:381336",
+    "id2": "@kommersant:109682",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381379",
+    "id2": "@kommersant:109704",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381337",
+    "id2": "@vedomosti:79882",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@rbc_news:151427",
+    "id2": "@kommersant:109650",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@kommersant:109604",
+    "id2": "@vedomosti:79793",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381263",
+    "id2": "@vedomosti:79851",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@kommersant:109664",
+    "id2": "@vedomosti:79857",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381410",
+    "id2": "@kommersant:109718",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@kommersant:109599",
+    "id2": "@vedomosti:79789",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381397",
+    "id2": "@rbc_news:151494",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@rbc_news"
+  },
+  {
+    "id1": "@rbc_news:151376",
+    "id2": "@kommersant:109584",
+    "label": 1,
+    "source1": "@rbc_news",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@kommersant:109682",
+    "id2": "@vedomosti:79881",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381327",
+    "id2": "@rbc_news:151470",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@rbc_news"
+  },
+  {
+    "id1": "@kommersant:109596",
+    "id2": "@vedomosti:79786",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@rbc_news:151388",
+    "id2": "@kommersant:109598",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381305",
+    "id2": "@vedomosti:79863",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@rbc_news:151388",
+    "id2": "@vedomosti:79788",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381290",
+    "id2": "@kommersant:109666",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@kommersant:109648",
+    "id2": "@vedomosti:79826",
+    "label": 1,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@rbc_news:151376",
+    "id2": "@vedomosti:79776",
+    "label": 1,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381292",
+    "id2": "@kommersant:109667",
+    "label": 1,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@rbc_news:151452",
+    "id2": "@kommersant:109669",
+    "label": 1,
+    "source1": "@rbc_news",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@rbc_news:151394",
+    "id2": "@kommersant:109603",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@kommersant:109602",
+    "id2": "@vedomosti:79791",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@rbc_news:151386",
+    "id2": "@kommersant:109593",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381395",
+    "id2": "@vedomosti:79900",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381335",
+    "id2": "@kommersant:109682",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381278",
+    "id2": "@kommersant:109663",
+    "label": 1,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381278",
+    "id2": "@vedomosti:79856",
+    "label": 1,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381349",
+    "id2": "@kommersant:109688",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@rbc_news:151381",
+    "id2": "@vedomosti:79780",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381380",
+    "id2": "@kommersant:109704",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381276",
+    "id2": "@rbc_news:151442",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@rbc_news"
+  },
+  {
+    "id1": "@tass_agency:381325",
+    "id2": "@vedomosti:79871",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@kommersant:109711",
+    "id2": "@vedomosti:79897",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381310",
+    "id2": "@kommersant:109672",
+    "label": 1,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@rbc_news:151377",
+    "id2": "@kommersant:109586",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@kommersant:109689",
+    "id2": "@vedomosti:79891",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381304",
+    "id2": "@vedomosti:79863",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381276",
+    "id2": "@rbc_news:151444",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@rbc_news"
+  },
+  {
+    "id1": "@rbc_news:151482",
+    "id2": "@vedomosti:79891",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381412",
+    "id2": "@vedomosti:79912",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@rbc_news:151490",
+    "id2": "@kommersant:109710",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@kommersant:109685",
+    "id2": "@vedomosti:79886",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381341",
+    "id2": "@rbc_news:151478",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@rbc_news"
+  },
+  {
+    "id1": "@tass_agency:381323",
+    "id2": "@vedomosti:79869",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@rbc_news:151427",
+    "id2": "@kommersant:109651",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@rbc_news:151471",
+    "id2": "@kommersant:109678",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381344",
+    "id2": "@vedomosti:79887",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381361",
+    "id2": "@kommersant:109696",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@rbc_news:151449",
+    "id2": "@vedomosti:79859",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381344",
+    "id2": "@kommersant:109687",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381390",
+    "id2": "@vedomosti:79896",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381400",
+    "id2": "@kommersant:109717",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@kommersant:109663",
+    "id2": "@vedomosti:79856",
+    "label": 1,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381313",
+    "id2": "@vedomosti:79866",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381286",
+    "id2": "@vedomosti:79857",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@rbc_news:151383",
+    "id2": "@vedomosti:79782",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@kommersant:109570",
+    "id2": "@vedomosti:79759",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@rbc_news:151395",
+    "id2": "@vedomosti:79793",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381291",
+    "id2": "@kommersant:109666",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381346",
+    "id2": "@kommersant:109686",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381260",
+    "id2": "@rbc_news:151438",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@rbc_news"
+  },
+  {
+    "id1": "@tass_agency:381279",
+    "id2": "@kommersant:109663",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@rbc_news:151476",
+    "id2": "@vedomosti:79882",
+    "label": 1,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381282",
+    "id2": "@rbc_news:151446",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@rbc_news"
+  },
+  {
+    "id1": "@tass_agency:381328",
+    "id2": "@kommersant:109678",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@rbc_news:151478",
+    "id2": "@vedomosti:79886",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381298",
+    "id2": "@vedomosti:79861",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381353",
+    "id2": "@vedomosti:79891",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@kommersant:109606",
+    "id2": "@vedomosti:79797",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@rbc_news:151447",
+    "id2": "@kommersant:109665",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381399",
+    "id2": "@kommersant:109717",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@rbc_news:151455",
+    "id2": "@vedomosti:79866",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@rbc_news:151470",
+    "id2": "@vedomosti:79872",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381298",
+    "id2": "@kommersant:109668",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@kommersant:109690",
+    "id2": "@vedomosti:79892",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@rbc_news:151489",
+    "id2": "@vedomosti:79896",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381311",
+    "id2": "@kommersant:109672",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@rbc_news:151403",
+    "id2": "@kommersant:109611",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@kommersant:109565",
+    "id2": "@vedomosti:79753",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381289",
+    "id2": "@rbc_news:151448",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@rbc_news"
+  },
+  {
+    "id1": "@tass_agency:381402",
+    "id2": "@vedomosti:79906",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@rbc_news:151363",
+    "id2": "@vedomosti:79760",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381389",
+    "id2": "@vedomosti:79896",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381293",
+    "id2": "@rbc_news:151449",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@rbc_news"
+  },
+  {
+    "id1": "@kommersant:109587",
+    "id2": "@vedomosti:79779",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@kommersant:109594",
+    "id2": "@vedomosti:79785",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381396",
+    "id2": "@vedomosti:79900",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381397",
+    "id2": "@vedomosti:79901",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381316",
+    "id2": "@rbc_news:151459",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@rbc_news"
+  },
+  {
+    "id1": "@rbc_news:151435",
+    "id2": "@kommersant:109654",
+    "label": 1,
+    "source1": "@rbc_news",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381345",
+    "id2": "@kommersant:109686",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@rbc_news:151393",
+    "id2": "@vedomosti:79791",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381281",
+    "id2": "@rbc_news:151446",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@rbc_news"
+  },
+  {
+    "id1": "@rbc_news:151490",
+    "id2": "@vedomosti:79897",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381349",
+    "id2": "@rbc_news:151481",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@rbc_news"
+  },
+  {
+    "id1": "@tass_agency:381370",
+    "id2": "@kommersant:109699",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381319",
+    "id2": "@kommersant:109674",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@rbc_news:151374",
+    "id2": "@vedomosti:79771",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381279",
+    "id2": "@rbc_news:151446",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@rbc_news"
+  },
+  {
+    "id1": "@kommersant:109649",
+    "id2": "@vedomosti:79828",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@kommersant:109600",
+    "id2": "@vedomosti:79790",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381337",
+    "id2": "@rbc_news:151476",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@rbc_news"
+  },
+  {
+    "id1": "@rbc_news:151445",
+    "id2": "@vedomosti:79856",
+    "label": 1,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381305",
+    "id2": "@rbc_news:151452",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@rbc_news"
+  },
+  {
+    "id1": "@kommersant:109584",
+    "id2": "@vedomosti:79775",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381342",
+    "id2": "@kommersant:109685",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381283",
+    "id2": "@kommersant:109664",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@kommersant:109713",
+    "id2": "@vedomosti:79898",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@rbc_news:151449",
+    "id2": "@kommersant:109667",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381341",
+    "id2": "@vedomosti:79886",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381230",
+    "id2": "@rbc_news:151427",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@rbc_news"
+  },
+  {
+    "id1": "@rbc_news:151509",
+    "id2": "@vedomosti:79917",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381230",
+    "id2": "@kommersant:109650",
+    "label": 1,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@vedomosti:79744",
+    "id2": "@interfaxonline:74435",
+    "label": 0,
+    "source1": "@vedomosti",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@kommersant:109531",
+    "id2": "@interfaxonline:74425",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@tass_agency:381405",
+    "id2": "@rbc_news:151500",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@rbc_news"
+  },
+  {
+    "id1": "@tass_agency:381305",
+    "id2": "@interfaxonline:74542",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@tass_agency:381222",
+    "id2": "@vedomosti:79827",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@kommersant:109513",
+    "id2": "@interfaxonline:74413",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@vedomosti:79779",
+    "id2": "@interfaxonline:74470",
+    "label": 0,
+    "source1": "@vedomosti",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@rbc_news:151261",
+    "id2": "@vedomosti:79666",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@kommersant:109613",
+    "id2": "@vedomosti:79806",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381230",
+    "id2": "@interfaxonline:74524",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@kommersant:109519",
+    "id2": "@interfaxonline:74417",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@tass_agency:381245",
+    "id2": "@rbc_news:151433",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@rbc_news"
+  },
+  {
+    "id1": "@tass_agency:381312",
+    "id2": "@vedomosti:79866",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@rbc_news:151313",
+    "id2": "@vedomosti:79717",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381259",
+    "id2": "@interfaxonline:74537",
+    "label": 1,
+    "source1": "@tass_agency",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@tass_agency:381343",
+    "id2": "@vedomosti:79887",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381396",
+    "id2": "@kommersant:109715",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381225",
+    "id2": "@vedomosti:79829",
+    "label": 1,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@kommersant:109717",
+    "id2": "@interfaxonline:74575",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@kommersant:109637",
+    "id2": "@interfaxonline:74514",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@kommersant:109447",
+    "id2": "@interfaxonline:74360",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@tass_agency:381282",
+    "id2": "@kommersant:109664",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381434",
+    "id2": "@rbc_news:151512",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@rbc_news"
+  },
+  {
+    "id1": "@vedomosti:79634",
+    "id2": "@interfaxonline:74350",
+    "label": 0,
+    "source1": "@vedomosti",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@rbc_news:151298",
+    "id2": "@kommersant:109500",
+    "label": 1,
+    "source1": "@rbc_news",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@kommersant:109513",
+    "id2": "@vedomosti:79712",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@rbc_news:151288",
+    "id2": "@kommersant:109491",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@rbc_news:151251",
+    "id2": "@interfaxonline:74366",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@tass_agency:381226",
+    "id2": "@interfaxonline:74523",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@rbc_news:151370",
+    "id2": "@kommersant:109575",
+    "label": 1,
+    "source1": "@rbc_news",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@kommersant:109582",
+    "id2": "@interfaxonline:74467",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@rbc_news:151507",
+    "id2": "@kommersant:109723",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381196",
+    "id2": "@interfaxonline:74510",
+    "label": 1,
+    "source1": "@tass_agency",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@tass_agency:381161",
+    "id2": "@kommersant:109620",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381325",
+    "id2": "@kommersant:109676",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381260",
+    "id2": "@interfaxonline:74536",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@rbc_news:151303",
+    "id2": "@vedomosti:79704",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381280",
+    "id2": "@rbc_news:151446",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@rbc_news"
+  },
+  {
+    "id1": "@vedomosti:79633",
+    "id2": "@interfaxonline:74349",
+    "label": 0,
+    "source1": "@vedomosti",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@tass_agency:381248",
+    "id2": "@interfaxonline:74531",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@vedomosti:79730",
+    "id2": "@interfaxonline:74424",
+    "label": 0,
+    "source1": "@vedomosti",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@rbc_news:151322",
+    "id2": "@vedomosti:79724",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381293",
+    "id2": "@vedomosti:79859",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@kommersant:109531",
+    "id2": "@vedomosti:79731",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381244",
+    "id2": "@rbc_news:151433",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@rbc_news"
+  },
+  {
+    "id1": "@tass_agency:381267",
+    "id2": "@kommersant:109657",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@rbc_news:151248",
+    "id2": "@kommersant:109453",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381224",
+    "id2": "@vedomosti:79828",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381166",
+    "id2": "@vedomosti:79820",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@kommersant:109594",
+    "id2": "@vedomosti:79784",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381458",
+    "id2": "@interfaxonline:74589",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@kommersant:109624",
+    "id2": "@interfaxonline:74497",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@tass_agency:381435",
+    "id2": "@kommersant:109726",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@kommersant:109579",
+    "id2": "@vedomosti:79769",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381271",
+    "id2": "@kommersant:109661",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@rbc_news:151241",
+    "id2": "@interfaxonline:74360",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@vedomosti:79627",
+    "id2": "@interfaxonline:74344",
+    "label": 0,
+    "source1": "@vedomosti",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@kommersant:109572",
+    "id2": "@interfaxonline:74458",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@rbc_news:151298",
+    "id2": "@interfaxonline:74405",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@tass_agency:381287",
+    "id2": "@kommersant:109665",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@kommersant:109581",
+    "id2": "@vedomosti:79771",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@kommersant:109592",
+    "id2": "@vedomosti:79783",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381221",
+    "id2": "@kommersant:109648",
+    "label": 1,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381206",
+    "id2": "@interfaxonline:74517",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@tass_agency:381284",
+    "id2": "@vedomosti:79857",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@kommersant:109629",
+    "id2": "@interfaxonline:74502",
+    "label": 1,
+    "source1": "@kommersant",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@tass_agency:381260",
+    "id2": "@interfaxonline:74537",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@tass_agency:381290",
+    "id2": "@rbc_news:151448",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@rbc_news"
+  },
+  {
+    "id1": "@tass_agency:381394",
+    "id2": "@kommersant:109714",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381399",
+    "id2": "@interfaxonline:74575",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@rbc_news:151334",
+    "id2": "@kommersant:109538",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381318",
+    "id2": "@vedomosti:79868",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@rbc_news:151496",
+    "id2": "@interfaxonline:74572",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@tass_agency:381198",
+    "id2": "@kommersant:109636",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@kommersant:109617",
+    "id2": "@interfaxonline:74495",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@rbc_news:151336",
+    "id2": "@kommersant:109540",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@tass_agency:381418",
+    "id2": "@interfaxonline:74581",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@kommersant:109590",
+    "id2": "@vedomosti:79782",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@kommersant:109598",
+    "id2": "@vedomosti:79788",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@tass_agency:381367",
+    "id2": "@kommersant:109698",
+    "label": 0,
+    "source1": "@tass_agency",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@rbc_news:151391",
+    "id2": "@kommersant:109601",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@kommersant"
+  },
+  {
+    "id1": "@vedomosti:79646",
+    "id2": "@interfaxonline:74358",
+    "label": 0,
+    "source1": "@vedomosti",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@vedomosti:79905",
+    "id2": "@interfaxonline:74575",
+    "label": 0,
+    "source1": "@vedomosti",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@rbc_news:151216",
+    "id2": "@interfaxonline:74347",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@interfaxonline"
+  },
+  {
+    "id1": "@rbc_news:151481",
+    "id2": "@vedomosti:79889",
+    "label": 0,
+    "source1": "@rbc_news",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@kommersant:109678",
+    "id2": "@vedomosti:79873",
+    "label": 0,
+    "source1": "@kommersant",
+    "source2": "@vedomosti"
+  },
+  {
+    "id1": "@vedomosti:79876",
+    "id2": "@interfaxonline:74547",
+    "label": 1,
+    "source1": "@vedomosti",
+    "source2": "@interfaxonline"
+  }
+]

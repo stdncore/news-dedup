@@ -1,0 +1,30 @@
+[project]
+name = "news-dedup"
+version = "0.1.0"
+description = "Semantic deduplication/clustering of Russian news, with Telegram ingestion"
+requires-python = ">=3.11"
+dependencies = [
+    "telethon>=1.36.0",
+    "sentence-transformers>=3.0.1",
+    "torch>=2.6.0",
+    "faiss-cpu>=1.8.0",
+    "datasketch>=1.6.5",
+    "scipy>=1.13.1",
+    "numpy>=1.26.4",
+    "pandas>=2.2.2",
+    "razdel>=0.5.0",
+    "scikit-learn>=1.5.0",
+    "pyyaml>=6.0.1",
+    "python-dotenv>=1.0.1",
+]
+
+[project.scripts]
+news-ingest = "ingest.telegram:main"
+news-dedup = "dedup.pipeline:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["ingest", "dedup"]

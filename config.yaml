@@ -1,0 +1,47 @@
+# Конфигурация сбора и дедупликации новостей.
+
+ingest:
+  # Публичные telegram-каналы (username без @ или с @, либо t.me/<name>).
+  channels:
+    - "@tass_agency"
+    - "@rbc_news"
+    - "@interfax_russia"
+    - "@kommersant"
+    - "@vedomosti"
+  # Сколько последних сообщений тянуть на канал при первом проходе.
+  history_limit: 500
+  db_path: "news.db"
+
+dedup:
+  db_path: "news.db"
+
+  # Модель эмбеддингов (sentence-transformers).
+  model: "deepvk/USER-bge-m3"
+  # Префикс запроса для bge-моделей (USER-bge-m3 ожидает инструкцию-префикс).
+  query_prefix: ""
+  # Сколько символов текста подавать в модель (после title).
+  max_chars: 1500
+  batch_size: 64
+
+  # Лексический пре-фильтр (MinHash/LSH).
+  prefilter:
+    enabled: true
+    num_perm: 256
+    jaccard_threshold: 0.7
+    shingle_size: 5   # размер символьных n-грамм (в словах)
+
+  # ANN + порог.
+  ann:
+    top_k: 20            # соседей на новость
+    hnsw_m: 32           # FAISS HNSW связность
+    ef_search: 64
+  # Порог косинуса для ребра между новостями (КАЛИБРОВАТЬ на своих данных).
+  cosine_threshold: 0.75
+  # Окно времени для блокинга: рёбра только между новостями в пределах N часов.
+  time_window_hours: 72
+
+  # Выбор канонической новости в кластере.
+  canonical: "earliest"   # earliest | longest
+
+  seed: 42
+  output: "clusters.json"
