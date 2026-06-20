@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import resource
+import sys
 from datetime import datetime
 
 import numpy as np
@@ -22,6 +24,13 @@ from .cluster import (
 from .embed import build_embeddings
 from .prefilter import lexical_edges
 from .text import is_digest
+
+
+def _log_rss(phase: str) -> None:
+    """Пиковая RSS после фазы. macOS отдаёт байты, Linux — килобайты."""
+    rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    mb = rss / (1024 ** 2) if sys.platform == "darwin" else rss / 1024
+    print(f"[mem] после {phase}: peak RSS {mb:.0f} MB")
 
 
 def load_news(db_path: str) -> pd.DataFrame:
@@ -65,6 +74,7 @@ def run(config: dict, df: pd.DataFrame | None = None, input_file: str | None = N
     if n == 0:
         raise SystemExit("В БД нет новостей — сначала запусти ingest.")
 
+    ids = df["id"].astype(str).tolist()
     titles = df["title"].tolist()
     texts = df["text"].tolist()
     published = [d.to_pydatetime() for d in df["published_at"]]
@@ -80,9 +90,10 @@ def run(config: dict, df: pd.DataFrame | None = None, input_file: str | None = N
             jaccard_threshold=pf.get("jaccard_threshold", 0.7),
             shingle_size=pf.get("shingle_size", 5),
         )
-        print(f"Лексический пре-фильтр: {len(lex)} рёбер")
+        # Доля пар к n — сигнал blowup'а на boilerplate (агентские футеры).
+        print(f"Лексический пре-фильтр: {len(lex)} рёбер ({len(lex) / max(n, 1):.2f}/новость)")
 
-    # 2) Эмбеддинги.
+    # 2) Эмбеддинги (инкрементальный кэш по id переживает краш прогона).
     emb = build_embeddings(
         titles,
         texts,
@@ -91,16 +102,20 @@ def run(config: dict, df: pd.DataFrame | None = None, input_file: str | None = N
         batch_size=cfg.get("batch_size", 64),
         query_prefix=cfg.get("query_prefix", ""),
         seed=cfg.get("seed", 42),
+        ids=ids,
+        cache_path=cfg.get("embeddings_cache"),
     )
+    _log_rss("эмбеддинги")
 
     # 3) ANN + 4/5) рёбра по порогу косинуса и окну времени.
     ann = cfg.get("ann", {})
     sims, idx = ann_neighbors(
         emb,
         top_k=ann.get("top_k", 20),
-        hnsw_m=ann.get("hnsw_m", 32),
-        ef_search=ann.get("ef_search", 64),
+        nlist=ann.get("nlist", 256),
+        nprobe=ann.get("nprobe", 32),
     )
+    _log_rss("FAISS индекс")
     sem = build_edges(
         sims,
         idx,

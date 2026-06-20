@@ -5,6 +5,12 @@
 """
 from __future__ import annotations
 
+import os
+
+# macOS: несколько копий libomp (faiss + torch + sklearn) -> segfault при
+# OpenMP-форке внутри faiss.search. Разрешаем до импорта faiss.
+os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
+
 from datetime import datetime
 
 import numpy as np
@@ -15,27 +21,41 @@ from scipy.sparse.csgraph import connected_components
 def ann_neighbors(
     emb: np.ndarray,
     top_k: int = 20,
-    hnsw_m: int = 32,
-    ef_search: int = 64,
+    nlist: int = 256,
+    nprobe: int = 32,
 ) -> tuple[np.ndarray, np.ndarray]:
     """top-k соседей по косинусу (inner product на L2-norm векторах).
 
     До 50k — IndexFlatIP (точный, стабильный на macOS).
-    Свыше 50k — HNSW для масштаба.
+    Свыше 50k — IndexIVFFlat: для разового статического индекса строится
+    быстрее и ест меньше RAM чем HNSW (у HNSW окупается только при многих
+    повторных запросах, а здесь один батч-проход).
     Возвращает (sims, idx): обе (N, top_k+1), включая саму точку.
     """
     import faiss
+
+    # macOS: faiss libomp и torch libomp конфликтуют при спавне параллельной
+    # OpenMP-команды внутри search -> segfault. Один поток у faiss убирает форк
+    # команды (работа в вызывающем потоке), краха нет. Поиск медленнее, но
+    # IVFFlat с nprobe всё равно не полный скан.
+    faiss.omp_set_num_threads(1)
 
     n, dim = emb.shape
     k = min(top_k + 1, n)
 
     if n <= 50_000:
         index = faiss.IndexFlatIP(dim)
+        index.add(emb)
     else:
-        index = faiss.IndexHNSWFlat(dim, hnsw_m, faiss.METRIC_INNER_PRODUCT)
-        index.hnsw.efSearch = ef_search
+        quantizer = faiss.IndexFlatIP(dim)
+        # nlist не должен превышать число точек; для устойчивости обучения
+        # FAISS хочет хотя бы ~39*nlist обучающих векторов.
+        nlist = min(nlist, max(1, n // 39))
+        index = faiss.IndexIVFFlat(quantizer, dim, nlist, faiss.METRIC_INNER_PRODUCT)
+        index.train(emb)
+        index.add(emb)
+        index.nprobe = nprobe
 
-    index.add(emb)
     sims, idx = index.search(emb, k)
     return sims, idx
 
