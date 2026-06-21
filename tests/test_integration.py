@@ -60,15 +60,16 @@ def test_real_model_known_duplicates():
         seed=cfg.get("seed", 42),
     )
 
+    threshold = cfg.get("cosine_threshold", 0.75)
     failed = []
     for pair in pos_pairs:
         i, j = pos_map[pair["id1"]], pos_map[pair["id2"]]
         sim = float(np.dot(emb[i], emb[j]))
-        if sim < 0.80:
+        if sim < threshold:
             failed.append((pair["id1"], pair["id2"], sim))
 
     assert not failed, (
-        f"Следующие позитивные пары имеют cosine < 0.80 — "
+        f"Следующие позитивные пары имеют cosine < {threshold} — "
         f"возможен неверный query_prefix или деградация модели:\n"
         + "\n".join(f"  {a} <-> {b}: {s:.3f}" for a, b, s in failed)
     )

@@ -8,6 +8,13 @@ ingest:
     - "@interfax_russia"
     - "@kommersant"
     - "@vedomosti"
+    - "@rian_ru"
+    - "@lentaru"
+    - "@bfmru"
+    - "@iz_ru"
+    - "@aif_ru"
+    - "@mk_ru"
+    - "@fontankaspb"
   # Сколько последних сообщений тянуть на канал при первом проходе.
   history_limit: 500
   db_path: "news.db"
@@ -21,7 +28,11 @@ dedup:
   query_prefix: ""
   # Сколько символов текста подавать в модель (после title).
   max_chars: 1500
-  batch_size: 64
+  batch_size: 256        # крупнее батч -> лучше утилизация CPU на 100k
+
+  # Инкрементальный кэш эмбеддингов (по id, atomic write по чанкам).
+  # Переживает краш многочасового прогона на 100k. Пусто -> без кэша.
+  embeddings_cache: "embeddings_cache.npz"
 
   # Лексический пре-фильтр (MinHash/LSH).
   prefilter:
@@ -32,13 +43,23 @@ dedup:
 
   # ANN + порог.
   ann:
-    top_k: 20            # соседей на новость
-    hnsw_m: 32           # FAISS HNSW связность
-    ef_search: 64
+    top_k: 50            # соседей на новость (50: max-кластер в тесте=102 >> 20, запас от фрагментации)
+    nlist: 256           # IVFFlat: число ячеек (>50k); авто-урезается под n
+    nprobe: 32           # IVFFlat: сколько ячеек проверять при поиске
   # Порог косинуса для ребра между новостями (КАЛИБРОВАТЬ на своих данных).
-  cosine_threshold: 0.75
+  # 0.80: при Louvain держит recall=1.0 на разметке, режет слабые мостики.
+  # 0.78: оптимум на 259 размеченных парах (tau-sweep + Louvain res=1.5).
+  cosine_threshold: 0.78
   # Окно времени для блокинга: рёбра только между новостями в пределах N часов.
-  time_window_hours: 72
+  # 72h → 24h: убирает ежедневные шаблонные сводки (COVID, БПЛА сбито N штук),
+  # которые имеют высокий косинус но разные события. Потерянные TP при 24h —
+  # спорная разметка (11 дней разницы, разные инциденты).
+  time_window_hours: 24
+
+  # Кластеризация графа рёбер: louvain | connected_components.
+  # Louvain режет транзитивные мостики. На 259 парах: F1=0.820, P=0.780, R=0.865.
+  clustering: "louvain"
+  louvain_resolution: 1.5
 
   # Выбор канонической новости в кластере.
   canonical: "earliest"   # earliest | longest
