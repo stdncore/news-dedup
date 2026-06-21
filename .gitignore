@@ -24,3 +24,9 @@ __pycache__/
 # Документы задания
 *.docx
 ~$*.docx
+
+# Промежуточные артефакты скрапинга (не для git, см. news_100k.json.gz)
+tests/fixtures/news_100k.json
+tests/fixtures/news_100k_raw.jsonl
+tests/fixtures/news_100k_extra*.json
+entities_cache.npz

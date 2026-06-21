@@ -84,6 +84,34 @@ def build_edges(
     return sorted(edges)
 
 
+def build_weighted_edges(
+    sims: np.ndarray,
+    idx: np.ndarray,
+    published_at: list[datetime],
+    cosine_threshold: float,
+    time_window_hours: float,
+) -> dict[tuple[int, int], float]:
+    """Как build_edges, но возвращает {(i,j): max_cosine} для Louvain.
+
+    Вес ребра = максимальный косинус между i и j (симметризуем ANN-выдачу).
+    """
+    window = time_window_hours * 3600.0
+    ts = np.array([d.timestamp() for d in published_at])
+    weights: dict[tuple[int, int], float] = {}
+    n = sims.shape[0]
+    for i in range(n):
+        for sim, j in zip(sims[i], idx[i]):
+            j = int(j)
+            if j == i or j < 0 or sim < cosine_threshold:
+                continue
+            if abs(ts[i] - ts[j]) > window:
+                continue
+            a, b = (i, j) if i < j else (j, i)
+            if sim > weights.get((a, b), 0.0):
+                weights[(a, b)] = float(sim)
+    return weights
+
+
 def connected_clusters(n: int, edges: list[tuple[int, int]]) -> np.ndarray:
     """Метки кластеров через компоненты связности графа рёбер."""
     if edges:
@@ -93,6 +121,36 @@ def connected_clusters(n: int, edges: list[tuple[int, int]]) -> np.ndarray:
     else:
         graph = coo_matrix((n, n))
     _, labels = connected_components(graph, directed=False)
+    return labels
+
+
+def louvain_clusters(
+    n: int,
+    weighted_edges: dict[tuple[int, int], float],
+    resolution: float = 1.0,
+    seed: int = 42,
+) -> np.ndarray:
+    """Метки кластеров через сообщества Louvain на взвешенном графе.
+
+    В отличие от компонент связности, Louvain режет слабые "мостики" между
+    плотными группами. Это убирает транзитивное слипание: горячий инфоповод
+    (атака БПЛА, война) иначе через цепочку похожих постов сливает соседние
+    события в мегакластер. Вес ребра = косинус (сила связи); модулярность
+    оптимизируется так, что слабые межсобытийные мостики оказываются на
+    границе разреза. resolution>1 дробит агрессивнее.
+    """
+    import networkx as nx
+    from networkx.algorithms.community import louvain_communities
+
+    g = nx.Graph()
+    g.add_nodes_from(range(n))
+    for (i, j), w in weighted_edges.items():
+        g.add_edge(i, j, weight=float(w))
+    comms = louvain_communities(g, weight="weight", resolution=resolution, seed=seed)
+    labels = np.zeros(n, dtype=int)
+    for cid, members in enumerate(comms):
+        for m in members:
+            labels[m] = cid
     return labels
 
 

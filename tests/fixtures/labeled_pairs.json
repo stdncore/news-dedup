@@ -212,7 +212,7 @@
   {
     "id1": "@kommersant:109648",
     "id2": "@vedomosti:79826",
-    "label": 1,
+    "label": 0,
     "source1": "@kommersant",
     "source2": "@vedomosti"
   },

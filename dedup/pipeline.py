@@ -17,8 +17,9 @@ import yaml
 
 from .cluster import (
     ann_neighbors,
-    build_edges,
+    build_weighted_edges,
     connected_clusters,
+    louvain_clusters,
     pick_canonical,
 )
 from .embed import build_embeddings
@@ -51,8 +52,15 @@ def load_news(db_path: str) -> pd.DataFrame:
 
 
 def load_fixture(path: str) -> pd.DataFrame:
-    with open(path, encoding="utf-8") as f:
-        data = json.load(f)
+    # .gz поддержан: фикстура 100k в репозитории хранится сжатой (133MB -> 31MB).
+    if path.endswith(".gz"):
+        import gzip
+
+        with gzip.open(path, "rt", encoding="utf-8") as f:
+            data = json.load(f)
+    else:
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
     df = pd.DataFrame(data)
     df["published_at"] = pd.to_datetime(df["published_at"], utc=True)
     df["title"] = df["title"].fillna("")
@@ -60,6 +68,12 @@ def load_fixture(path: str) -> pd.DataFrame:
     before = len(df)
     df = df[~df["text"].apply(is_digest)].reset_index(drop=True)
     print(f"Фильтр дайджестов: убрано {before - len(df)} постов, осталось {len(df)}")
+    # Фильтр постов где текст — только URL (без содержательного контента).
+    import re as _re
+    _url_only = _re.compile(r"^https?://\S+$")
+    before = len(df)
+    df = df[~df["text"].str.strip().apply(lambda t: bool(_url_only.match(t)))].reset_index(drop=True)
+    print(f"Фильтр URL-only: убрано {before - len(df)} постов, осталось {len(df)}")
     return df.sort_values("published_at").reset_index(drop=True)
 
 
@@ -116,23 +130,38 @@ def run(config: dict, df: pd.DataFrame | None = None, input_file: str | None = N
         nprobe=ann.get("nprobe", 32),
     )
     _log_rss("FAISS индекс")
-    sem = build_edges(
-        sims,
-        idx,
-        published,
-        cosine_threshold=cfg.get("cosine_threshold", 0.85),
-        time_window_hours=cfg.get("time_window_hours", 72),
+    cosine_threshold = cfg.get("cosine_threshold", 0.85)
+    tw_hours = cfg.get("time_window_hours", 72)
+    sem_w = build_weighted_edges(
+        sims, idx, published,
+        cosine_threshold=cosine_threshold,
+        time_window_hours=tw_hours,
     )
-    print(f"Семантические рёбра: {len(sem)}")
+    print(f"Семантические рёбра: {len(sem_w)}")
 
-    # 6) Компоненты связности.
+    # 6) Кластеризация графа рёбер.
     # Lexical edges тоже фильтруем по времени: boilerplate-заголовки (ТАСС, Интерфакс)
-    # иначе склеят события, разнесённые на месяцы.
-    tw = cfg.get("time_window_hours", 72) * 3600.0
+    # иначе склеят события, разнесённые на месяцы. Лексическим рёбрам даём
+    # высокий вес (1.0) — это высокоточные MinHash-совпадения.
+    tw = tw_hours * 3600.0
     ts = [d.timestamp() for d in published]
     lex = [(i, j) for i, j in lex if abs(ts[i] - ts[j]) <= tw]
-    edges = sorted(set(lex) | set(sem))
-    labels = connected_clusters(n, edges)
+    weighted = dict(sem_w)
+    for i, j in lex:
+        a, b = (i, j) if i < j else (j, i)
+        weighted[(a, b)] = max(weighted.get((a, b), 0.0), 1.0)
+
+    method = cfg.get("clustering", "louvain")
+    if method == "louvain":
+        labels = louvain_clusters(
+            n, weighted,
+            resolution=cfg.get("louvain_resolution", 1.0),
+            seed=cfg.get("seed", 42),
+        )
+        print(f"Кластеризация: Louvain (resolution={cfg.get('louvain_resolution', 1.0)})")
+    else:
+        labels = connected_clusters(n, sorted(weighted.keys()))
+        print("Кластеризация: connected components")
     df = df.copy()
     df["cluster_id"] = labels
 

@@ -4,19 +4,32 @@
 
 ## Результаты
 
-На выборке из 5 Telegram-каналов (1500 постов):
+### 100k постов (27 Telegram-каналов)
 
 | Метрика | Значение |
 |---|---|
-| Постов после фильтра дайджестов | 1168 |
-| Кластеров (событий) | 669 |
-| Дублей убрано | 499 (43%) |
-| Pairwise F1 — train (149 пар) | **0.966** |
-| Pairwise F1 — held-out (65 пар) | **1.000** |
-| Pairwise Precision (held-out) | 1.000 |
-| Pairwise Recall (held-out) | 1.000 |
+| Постов на входе | 100 000 |
+| После фильтров (дайджесты + URL-only) | 77 482 |
+| Кластеров (событий) | 56 383 |
+| Дублей убрано | 21 099 (27%) |
+| Макс. кластер | 423 |
+| **Pairwise F1 (экспертная разметка, 211 пар)** | **0.933** |
+| Pairwise Precision | 0.875 |
+| Pairwise Recall | 1.000 |
 
-Tau=0.75 откалиброван на 70% пар (149), проверен на held-out 30% (65 пар, 8 позитивных). Разметка: `scripts/calibrate_tau.py --test-ratio 0.3`.
+Оценка по `scripts/evaluate_quality.py` на экспертно-размеченных парах `labeled_pairs.json`.
+3 остаточных FP — грани одного инфоповода (массированная атака БПЛА на Москву: число
+сбитых / закрытие аэропортов / удар по НПЗ), граничный случай разметки.
+
+Воспроизведение: `python -m dedup.pipeline --input tests/fixtures/news_100k.json.gz` →
+`python scripts/evaluate_quality.py`.
+
+### Малая выборка (1500 постов, отладка)
+
+| Метрика | Значение |
+|---|---|
+| Постов после фильтра | 1168 |
+| Pairwise F1 — held-out (65 пар) | 1.000 |
 
 ## Подход
 
@@ -33,9 +46,9 @@ Telegram-каналы → Ingest (Telethon → SQLite)
                         │
                   FAISS ANN            ← top-20 соседей по косинусу
                         │
-             Граф рёбер: cosine ≥ 0.75 AND Δt ≤ 72h
+             Граф рёбер: cosine ≥ 0.80 AND Δt ≤ 72h
                         │
-            Connected components       ← union-find (scipy)
+            Louvain communities        ← режет транзитивные мостики
                         │
           Canonical: earliest pub_date
                         │
@@ -46,7 +59,7 @@ Telegram-каналы → Ingest (Telethon → SQLite)
 
 **Модель: `deepvk/USER-bge-m3`** — лучший результат на RusBEIR (NDCG@10 61.13) и кластеризации новостей (AMI 0.84) среди открытых русскоязычных моделей.
 
-**Кластеризация: connected components** — вместо K-means (не знаем число кластеров) и DBSCAN (O(n²) на 100k). FAISS ANN граф + union-find: O(n·k) память, инкрементальное пополнение.
+**Кластеризация: Louvain communities** — вместо connected components (union-find). На 100k connected-components страдает транзитивным слипанием: горячий инфоповод (атака БПЛА, война) через цепочку похожих постов сливает соседние события в мегакластер (max-кластер был 1720). Louvain оптимизирует модулярность взвешенного графа (вес = косинус) и режет слабые межсобытийные мостики. Результат: F1 0.857 → **0.933**, max-кластер 1720 → 423, recall=1.0 сохраняется. Connected components доступен через `clustering: connected_components`.
 
 **Порог tau=0.75** откалиброван на train-части (149 пар) по pairwise F1:
 
