@@ -1,12 +1,12 @@
-"""Генератор кандидатов для разметки пар.
+"""Generator of candidate pairs for labeling.
 
-Стратегия: пары из "серой зоны" косинуса [lo, hi] дают максимальный прирост
-от разметки — именно там лежит граница tau. Дополнительно берём:
-- пары IN одном кластере с косинусом ниже медианы (потенциальные FP через транзитивность)
-- пары NOT в одном кластере, но косинус высокий (потенциальные FN)
+Strategy: pairs from the cosine "gray zone" [lo, hi] give the largest gain
+from labeling — that's where the tau boundary lies. We additionally take:
+- pairs IN the same cluster with cosine below the median (potential FPs via transitivity)
+- pairs NOT in the same cluster but with high cosine (potential FNs)
 
-Формат вывода: JSON совместим с labeled_pairs.json (label=null до разметки).
-Текст обоих постов напечатан для ручной разметки в терминале.
+Output format: JSON compatible with labeled_pairs.json (label=null until labeled).
+The text of both posts is printed for manual labeling in the terminal.
 """
 from __future__ import annotations
 
@@ -47,9 +47,9 @@ def cos(vec, a, b):
 
 
 def sample_grey_zone(vec, id_to_cluster, existing, news, lo=0.76, hi=0.84, n=50, seed=42):
-    """Случайные пары из кэша с косинусом в [lo, hi], не в existing."""
+    """Random pairs from the cache with cosine in [lo, hi], not already in existing."""
     rng = random.Random(seed)
-    # Только посты с достаточным текстом (мин 40 символов после strip)
+    # Only posts with enough text (min 40 chars after strip)
     ids = [k for k in vec if k in id_to_cluster and k in news
            and len(((news[k].get("title") or "") + (news[k].get("text") or "")).strip()) >= 40]
     rng.shuffle(ids)
@@ -58,7 +58,7 @@ def sample_grey_zone(vec, id_to_cluster, existing, news, lo=0.76, hi=0.84, n=50,
     for i, a in enumerate(ids):
         if len(pairs) >= n:
             break
-        # Сравниваем с небольшим окном соседей по перемешанному списку
+        # Compare against a small window of neighbors in the shuffled list
         for b in ids[i+1:i+200]:
             if len(pairs) >= n:
                 break
@@ -84,7 +84,7 @@ def parse_dt(n):
 
 
 def auto_label(pairs, news, auto_threshold_hours=24):
-    """Пары с |Δt| > порога → авто-метка 0 (разные события), не показывать."""
+    """Pairs with |Δt| > threshold -> auto-label 0 (different events), don't show them."""
     auto, manual = [], []
     for a, b, c in pairs:
         ta = parse_dt(news.get(a, {}))
@@ -99,7 +99,7 @@ def auto_label(pairs, news, auto_threshold_hours=24):
 
 
 def interactive_label(pairs, news, id_to_cluster):
-    """Интерактивная разметка: показывает пару, просит 0/1/s(skip)/q(quit)."""
+    """Interactive labeling: shows a pair, prompts for 0/1/s(skip)/q(quit)."""
     results = []
     print("\n" + "="*60)
     print("РАЗМЕТКА ПАР")
@@ -161,7 +161,7 @@ def merge_and_save(new_pairs, labels_path):
     added = 0
     for p in new_pairs:
         if (p["id1"], p["id2"]) not in seen:
-            # убираем служебное поле cosine из финального файла
+            # remove the internal cosine field from the final file
             entry = {k: v for k, v in p.items() if k != "cosine"}
             existing.append(entry)
             seen.add((p["id1"], p["id2"]))
@@ -217,7 +217,7 @@ def main():
 
     if labeled:
         merge_and_save(labeled, LABELS)
-        # Быстрая оценка после разметки
+        # Quick evaluation after labeling
         print("\nПересчёт F1 на обновлённой разметке...")
         import subprocess, sys
         subprocess.run([sys.executable, "scripts/evaluate_quality.py"])

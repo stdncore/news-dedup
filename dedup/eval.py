@@ -1,8 +1,8 @@
-"""Оценка качества кластеризации.
+"""Clustering quality evaluation.
 
-Две ситуации:
-  * есть ground-truth метки событий -> pairwise P/R/F1 + ARI;
-  * нет разметки -> структурные sanity-метрики (распределение размеров).
+Two scenarios:
+  * ground-truth event labels are available -> pairwise P/R/F1 + ARI;
+  * no labels -> structural sanity metrics (size distribution).
 """
 from __future__ import annotations
 
@@ -12,9 +12,9 @@ import numpy as np
 
 
 def pairwise_prf(true_labels: list[int], pred_labels: list[int]) -> dict[str, float]:
-    """Pairwise precision/recall/F1: считаем пары в одном кластере.
+    """Pairwise precision/recall/F1: count pairs in the same cluster.
 
-    TP — пара в одном кластере и в truth, и в предсказании.
+    TP — a pair in the same cluster in both truth and prediction.
     """
     def same_cluster_pairs(labels):
         groups: dict[int, list[int]] = {}
@@ -48,7 +48,7 @@ def evaluate(true_labels: list[int], pred_labels: list[int]) -> dict[str, float]
 
 
 def cluster_size_stats(pred_labels: list[int]) -> dict[str, float]:
-    """Без разметки: структурные метрики качества."""
+    """No labels: structural quality metrics."""
     labels = np.asarray(pred_labels)
     _, counts = np.unique(labels, return_counts=True)
     return {

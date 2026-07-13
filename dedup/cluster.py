@@ -1,14 +1,14 @@
-"""Кластеризация: FAISS ANN -> рёбра по порогу косинуса + окну времени ->
-компоненты связности (union-find) -> выбор канонической новости.
+"""Clustering: FAISS ANN -> edges by cosine threshold + time window ->
+connected components (union-find) -> pick the canonical news item.
 
-Масштабируется на 100k+: ANN-поиск соседей вместо O(n^2) матрицы.
+Scales to 100k+: ANN neighbor search instead of an O(n^2) matrix.
 """
 from __future__ import annotations
 
 import os
 
-# macOS: несколько копий libomp (faiss + torch + sklearn) -> segfault при
-# OpenMP-форке внутри faiss.search. Разрешаем до импорта faiss.
+# macOS: multiple libomp copies (faiss + torch + sklearn) -> segfault on
+# OpenMP fork inside faiss.search. Allow it before importing faiss.
 os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
 
 from datetime import datetime
@@ -24,20 +24,20 @@ def ann_neighbors(
     nlist: int = 256,
     nprobe: int = 32,
 ) -> tuple[np.ndarray, np.ndarray]:
-    """top-k соседей по косинусу (inner product на L2-norm векторах).
+    """Top-k cosine neighbors (inner product on L2-normalized vectors).
 
-    До 50k — IndexFlatIP (точный, стабильный на macOS).
-    Свыше 50k — IndexIVFFlat: для разового статического индекса строится
-    быстрее и ест меньше RAM чем HNSW (у HNSW окупается только при многих
-    повторных запросах, а здесь один батч-проход).
-    Возвращает (sims, idx): обе (N, top_k+1), включая саму точку.
+    Up to 50k — IndexFlatIP (exact, stable on macOS).
+    Above 50k — IndexIVFFlat: for a one-off static index it builds faster
+    and uses less RAM than HNSW (HNSW only pays off with many repeated
+    queries, whereas here it's a single batch pass).
+    Returns (sims, idx): both (N, top_k+1), including the point itself.
     """
     import faiss
 
-    # macOS: faiss libomp и torch libomp конфликтуют при спавне параллельной
-    # OpenMP-команды внутри search -> segfault. Один поток у faiss убирает форк
-    # команды (работа в вызывающем потоке), краха нет. Поиск медленнее, но
-    # IVFFlat с nprobe всё равно не полный скан.
+    # macOS: faiss libomp and torch libomp conflict when faiss.search spawns
+    # a parallel OpenMP team -> segfault. Forcing faiss to one thread avoids
+    # spawning a team (work runs in the calling thread), so no crash. Search
+    # is slower, but IVFFlat with nprobe still isn't a full scan.
     faiss.omp_set_num_threads(1)
 
     n, dim = emb.shape
@@ -48,8 +48,8 @@ def ann_neighbors(
         index.add(emb)
     else:
         quantizer = faiss.IndexFlatIP(dim)
-        # nlist не должен превышать число точек; для устойчивости обучения
-        # FAISS хочет хотя бы ~39*nlist обучающих векторов.
+        # nlist must not exceed the number of points; for stable training
+        # FAISS wants at least ~39*nlist training vectors.
         nlist = min(nlist, max(1, n // 39))
         index = faiss.IndexIVFFlat(quantizer, dim, nlist, faiss.METRIC_INNER_PRODUCT)
         index.train(emb)
@@ -67,7 +67,7 @@ def build_edges(
     cosine_threshold: float,
     time_window_hours: float,
 ) -> list[tuple[int, int]]:
-    """Рёбра между новостями: косинус >= порог И разница времени <= окна."""
+    """Edges between news items: cosine >= threshold AND time difference <= window."""
     window = time_window_hours * 3600.0
     ts = np.array([d.timestamp() for d in published_at])
     edges: set[tuple[int, int]] = set()
@@ -91,9 +91,9 @@ def build_weighted_edges(
     cosine_threshold: float,
     time_window_hours: float,
 ) -> dict[tuple[int, int], float]:
-    """Как build_edges, но возвращает {(i,j): max_cosine} для Louvain.
+    """Like build_edges, but returns {(i,j): max_cosine} for Louvain.
 
-    Вес ребра = максимальный косинус между i и j (симметризуем ANN-выдачу).
+    Edge weight = maximum cosine between i and j (symmetrizing the ANN output).
     """
     window = time_window_hours * 3600.0
     ts = np.array([d.timestamp() for d in published_at])
@@ -113,7 +113,7 @@ def build_weighted_edges(
 
 
 def connected_clusters(n: int, edges: list[tuple[int, int]]) -> np.ndarray:
-    """Метки кластеров через компоненты связности графа рёбер."""
+    """Cluster labels via connected components of the edge graph."""
     if edges:
         rows, cols = zip(*edges)
         data = np.ones(len(edges))
@@ -130,14 +130,14 @@ def louvain_clusters(
     resolution: float = 1.0,
     seed: int = 42,
 ) -> np.ndarray:
-    """Метки кластеров через сообщества Louvain на взвешенном графе.
+    """Cluster labels via Louvain communities on the weighted graph.
 
-    В отличие от компонент связности, Louvain режет слабые "мостики" между
-    плотными группами. Это убирает транзитивное слипание: горячий инфоповод
-    (атака БПЛА, война) иначе через цепочку похожих постов сливает соседние
-    события в мегакластер. Вес ребра = косинус (сила связи); модулярность
-    оптимизируется так, что слабые межсобытийные мостики оказываются на
-    границе разреза. resolution>1 дробит агрессивнее.
+    Unlike connected components, Louvain cuts weak "bridges" between dense
+    groups. This removes transitive over-merging: a hot news topic (drone
+    attack, war) would otherwise merge adjacent events into a mega-cluster
+    through a chain of similar posts. Edge weight = cosine (connection
+    strength); modularity is optimized so that weak inter-event bridges end
+    up at the cut boundary. resolution>1 splits more aggressively.
     """
     import networkx as nx
     from networkx.algorithms.community import louvain_communities
@@ -160,7 +160,7 @@ def pick_canonical(
     text_len: list[int],
     strategy: str = "earliest",
 ) -> dict[int, int]:
-    """Для каждого cluster_id выбрать индекс канонической новости."""
+    """For each cluster_id, pick the index of the canonical news item."""
     best: dict[int, int] = {}
     for i, lab in enumerate(labels):
         lab = int(lab)

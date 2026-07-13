@@ -1,8 +1,8 @@
-"""Быстрый эксперимент кластеризации БЕЗ пересчёта эмбеддингов.
+"""Quick clustering experiment WITHOUT recomputing embeddings.
 
-Эмбеддинги берутся из кэша по id, прогоняются только стадии ANN -> рёбра ->
-кластеризация -> оценка по labeled_pairs. Позволяет сравнить connected
-components vs Louvain за минуты вместо часов.
+Embeddings are pulled from the cache by id; only the ANN -> edges ->
+clustering -> evaluation against labeled_pairs stages are run. Lets you
+compare connected components vs Louvain in minutes instead of hours.
 """
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ def load_state():
     result = json.loads(Path("clusters.json").read_text(encoding="utf-8"))
     news = {p["id"]: p for p in json.loads(Path("tests/fixtures/news_100k.json").read_text(encoding="utf-8"))}
 
-    # Порядок id строго как в прогоне (per_news сохраняет порядок df).
+    # id order matches the run exactly (per_news preserves df order).
     ids = [r["id"] for r in result["per_news"]]
     cache = np.load(cfg["embeddings_cache"], allow_pickle=True)
     vec = {str(k): v for k, v in zip(cache["ids"], cache["vectors"])}
@@ -66,7 +66,7 @@ def structure(labels):
 
 
 def louvain_clusters(n, edges, sims_lookup, resolution=1.0, seed=42):
-    """Сообщества Louvain на взвешенном графе (вес = косинус)."""
+    """Louvain communities on a weighted graph (weight = cosine similarity)."""
     import networkx as nx
     from networkx.algorithms.community import louvain_communities
 
@@ -86,17 +86,17 @@ def main():
     t0 = time.perf_counter()
     cfg, ids, emb, published = load_state()
     n = len(ids)
-    print(f"Загружено {n} постов из кэша за {time.perf_counter()-t0:.1f}c")
+    print(f"Loaded {n} posts from cache in {time.perf_counter()-t0:.1f}s")
 
     ann = cfg.get("ann", {})
     sims, idx = ann_neighbors(emb, top_k=ann.get("top_k", 50),
                               nlist=ann.get("nlist", 256), nprobe=ann.get("nprobe", 32))
-    print(f"FAISS готов за {time.perf_counter()-t0:.1f}c")
+    print(f"FAISS ready in {time.perf_counter()-t0:.1f}s")
 
     tau = cfg.get("cosine_threshold", 0.75)
     tw = cfg.get("time_window_hours", 72)
 
-    # Рёбра как список + словарь весов (для Louvain).
+    # Edges as a list + a weight dict (for Louvain).
     edge_list = build_edges(sims, idx, published, cosine_threshold=tau, time_window_hours=tw)
     window = tw * 3600.0
     ts = np.array([d.timestamp() for d in published])
@@ -110,22 +110,22 @@ def main():
                 continue
             a, b = min(i, j), max(i, j)
             eweight[(a, b)] = max(eweight.get((a, b), 0.0), float(sim))
-    print(f"Рёбер: {len(edge_list)}")
+    print(f"Edges: {len(edge_list)}")
 
     # Baseline: connected components.
     cc = connected_clusters(n, edge_list)
     print("\n=== connected components (baseline) ===")
-    print("  структура:", structure(cc))
+    print("  structure:", structure(cc))
     print("  pairwise: ", eval_pairs(ids, cc))
 
-    # Louvain при нескольких resolution.
+    # Louvain across several resolution values.
     for res in (0.5, 1.0, 1.5, 2.0):
         lv = louvain_clusters(n, eweight, sims, resolution=res)
         print(f"\n=== Louvain resolution={res} ===")
-        print("  структура:", structure(lv))
+        print("  structure:", structure(lv))
         print("  pairwise: ", eval_pairs(ids, lv))
 
-    print(f"\nИтого {time.perf_counter()-t0:.1f}c")
+    print(f"\nTotal {time.perf_counter()-t0:.1f}s")
 
 
 if __name__ == "__main__":

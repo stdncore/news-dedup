@@ -1,20 +1,20 @@
-"""Интерактивная разметка пар новостей для eval.
+"""Interactive labeling of news pairs for eval.
 
-Показывает пары кандидатов (близкие по времени, разные источники),
-ты решаешь: одно событие или нет.
+Shows candidate pairs (close in time, different sources),
+you decide: same event or not.
 
-Управление:
-  1  — дубль (одно событие)
-  0  — не дубль
-  s  — пропустить
-  q  — выйти, сохранить
+Controls:
+  1  — duplicate (same event)
+  0  — not a duplicate
+  s  — skip
+  q  — quit, save
 
-Сохраняет в tests/fixtures/labeled_pairs.json:
+Saves to tests/fixtures/labeled_pairs.json:
   [{"id1": ..., "id2": ..., "label": 1}, ...]
 
-Запуск:
+Run:
     python scripts/label_pairs.py
-    python scripts/label_pairs.py --limit 80  # сколько пар размечать
+    python scripts/label_pairs.py --limit 80  # how many pairs to label
 """
 from __future__ import annotations
 
@@ -44,7 +44,7 @@ def _is_digest(text: str) -> bool:
     if len(_BULLET_RE.findall(text)) >= 3 and len(text) > 250:
         return True
     return False
-WINDOW_HOURS = 6  # показываем пары в пределах этого окна
+WINDOW_HOURS = 6  # show pairs within this window
 
 
 def parse_dt(s: str | None) -> datetime:
@@ -54,7 +54,7 @@ def parse_dt(s: str | None) -> datetime:
 
 
 def candidate_pairs(posts: list[dict], window_h: int, max_pairs: int) -> list[tuple[dict, dict]]:
-    """Пары: разные источники + опубликованы в пределах window_h часов."""
+    """Pairs: different sources + published within window_h hours of each other."""
     pairs = []
     for a, b in combinations(posts, 2):
         if a["source"] == b["source"]:
@@ -64,9 +64,9 @@ def candidate_pairs(posts: list[dict], window_h: int, max_pairs: int) -> list[tu
         diff = abs((dt_a - dt_b).total_seconds()) / 3600
         if diff <= window_h:
             pairs.append((a, b, diff))
-    # сортируем по разнице времени (ближайшие — вероятнее дубли)
+    # sort by time difference (closer in time — more likely duplicates)
     pairs.sort(key=lambda x: x[2])
-    # перемешиваем немного чтобы не все из одного куска
+    # shuffle a bit so they're not all from the same chunk
     top = pairs[: max_pairs * 3]
     random.shuffle(top)
     return [(a, b) for a, b, _ in top[:max_pairs]]
@@ -89,7 +89,7 @@ def _clean(text: str) -> str:
 def show_pair(idx: int, total: int, a: dict, b: dict) -> None:
     sep = "─" * 60
     print(f"\n{sep}")
-    print(f"Пара {idx}/{total}")
+    print(f"Pair {idx}/{total}")
     print(sep)
     print(f"[A] {a['source']}  {a['published_at']}")
     print(textwrap.fill(_clean(a["text"])[:400], width=70))
@@ -97,7 +97,7 @@ def show_pair(idx: int, total: int, a: dict, b: dict) -> None:
     print(f"[B] {b['source']}  {b['published_at']}")
     print(textwrap.fill(_clean(b["text"])[:400], width=70))
     print(sep)
-    print("1=дубль  0=не дубль  s=пропустить  q=выйти")
+    print("1=duplicate  0=not a duplicate  s=skip  q=quit")
 
 
 def main() -> None:
@@ -114,19 +114,19 @@ def main() -> None:
     posts = json.load(open(args.fixture, encoding="utf-8"))
     before = len(posts)
     posts = [p for p in posts if not _is_digest(p.get("text", ""))]
-    print(f"Загружено {before} постов, после фильтра дайджестов: {len(posts)}")
+    print(f"Loaded {before} posts, after digest filter: {len(posts)}")
 
     pairs = candidate_pairs(posts, args.window, args.limit)
-    print(f"Кандидатов для разметки: {len(pairs)} (окно {args.window}ч, разные источники)")
+    print(f"Candidates to label: {len(pairs)} (window {args.window}h, different sources)")
 
     out_path = Path(args.out)
-    # дозагружаем уже размеченные если файл есть
+    # load already-labeled pairs if the file exists
     labeled: list[dict] = []
     if out_path.exists():
         labeled = json.load(open(out_path, encoding="utf-8"))
         done_ids = {(r["id1"], r["id2"]) for r in labeled}
         pairs = [(a, b) for a, b in pairs if (a["id"], b["id"]) not in done_ids]
-        print(f"Уже размечено: {len(labeled)}, осталось кандидатов: {len(pairs)}")
+        print(f"Already labeled: {len(labeled)}, candidates remaining: {len(pairs)}")
 
     try:
         for i, (a, b) in enumerate(pairs, 1):
@@ -146,7 +146,7 @@ def main() -> None:
                         "source2": b["source"],
                     })
                     break
-                print("Введи 1, 0, s или q")
+                print("Enter 1, 0, s or q")
     except KeyboardInterrupt:
         pass
 
@@ -155,8 +155,8 @@ def main() -> None:
         json.dump(labeled, f, ensure_ascii=False, indent=2)
 
     n_dup = sum(r["label"] for r in labeled)
-    print(f"\nСохранено {len(labeled)} пар → {out_path}")
-    print(f"Дублей: {n_dup}  Не-дублей: {len(labeled) - n_dup}")
+    print(f"\nSaved {len(labeled)} pairs → {out_path}")
+    print(f"Duplicates: {n_dup}  Non-duplicates: {len(labeled) - n_dup}")
 
 
 if __name__ == "__main__":

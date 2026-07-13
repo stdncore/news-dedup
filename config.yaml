@@ -1,7 +1,7 @@
-# Конфигурация сбора и дедупликации новостей.
+# Configuration for news ingestion and deduplication.
 
 ingest:
-  # Публичные telegram-каналы (username без @ или с @, либо t.me/<name>).
+  # Public telegram channels (username with or without @, or t.me/<name>).
   channels:
     - "@tass_agency"
     - "@rbc_news"
@@ -15,53 +15,53 @@ ingest:
     - "@aif_ru"
     - "@mk_ru"
     - "@fontankaspb"
-  # Сколько последних сообщений тянуть на канал при первом проходе.
+  # How many recent messages to pull per channel on the first pass.
   history_limit: 500
   db_path: "news.db"
 
 dedup:
   db_path: "news.db"
 
-  # Модель эмбеддингов (sentence-transformers).
+  # Embedding model (sentence-transformers).
   model: "deepvk/USER-bge-m3"
-  # Префикс запроса для bge-моделей (USER-bge-m3 ожидает инструкцию-префикс).
+  # Query prefix for bge models (USER-bge-m3 expects an instruction prefix).
   query_prefix: ""
-  # Сколько символов текста подавать в модель (после title).
+  # How many characters of text to feed into the model (after the title).
   max_chars: 1500
-  batch_size: 256        # крупнее батч -> лучше утилизация CPU на 100k
+  batch_size: 256        # bigger batch -> better CPU utilization at 100k
 
-  # Инкрементальный кэш эмбеддингов (по id, atomic write по чанкам).
-  # Переживает краш многочасового прогона на 100k. Пусто -> без кэша.
+  # Incremental embeddings cache (keyed by id, atomic write per chunk).
+  # Survives a crash during a multi-hour 100k run. Empty -> no cache.
   embeddings_cache: "embeddings_cache.npz"
 
-  # Лексический пре-фильтр (MinHash/LSH).
+  # Lexical pre-filter (MinHash/LSH).
   prefilter:
     enabled: true
     num_perm: 256
     jaccard_threshold: 0.7
-    shingle_size: 5   # размер символьных n-грамм (в словах)
+    shingle_size: 5   # character n-gram size (in words)
 
-  # ANN + порог.
+  # ANN + threshold.
   ann:
-    top_k: 50            # соседей на новость (50: max-кластер в тесте=102 >> 20, запас от фрагментации)
-    nlist: 256           # IVFFlat: число ячеек (>50k); авто-урезается под n
-    nprobe: 32           # IVFFlat: сколько ячеек проверять при поиске
-  # Порог косинуса для ребра между новостями (КАЛИБРОВАТЬ на своих данных).
-  # 0.80: при Louvain держит recall=1.0 на разметке, режет слабые мостики.
-  # 0.78: оптимум на 259 размеченных парах (tau-sweep + Louvain res=1.5).
+    top_k: 50            # neighbors per news item (50: max cluster in test=102 >> 20, margin against fragmentation)
+    nlist: 256           # IVFFlat: number of cells (>50k); auto-shrunk to fit n
+    nprobe: 32           # IVFFlat: how many cells to probe during search
+  # Cosine threshold for an edge between news items (CALIBRATE on your own data).
+  # 0.80: with Louvain keeps recall=1.0 on the labeled set, cuts weak bridges.
+  # 0.78: optimum on 259 labeled pairs (tau-sweep + Louvain res=1.5).
   cosine_threshold: 0.78
-  # Окно времени для блокинга: рёбра только между новостями в пределах N часов.
-  # 72h → 24h: убирает ежедневные шаблонные сводки (COVID, БПЛА сбито N штук),
-  # которые имеют высокий косинус но разные события. Потерянные TP при 24h —
-  # спорная разметка (11 дней разницы, разные инциденты).
+  # Time window for blocking: edges only between news items within N hours of each other.
+  # 72h → 24h: removes daily boilerplate roundups (COVID, N drones shot down)
+  # that have high cosine similarity but are different events. TPs lost at 24h are
+  # borderline labels (11 days apart, different incidents).
   time_window_hours: 24
 
-  # Кластеризация графа рёбер: louvain | connected_components.
-  # Louvain режет транзитивные мостики. На 259 парах: F1=0.820, P=0.780, R=0.865.
+  # Edge-graph clustering: louvain | connected_components.
+  # Louvain cuts transitive bridges. On 259 pairs: F1=0.820, P=0.780, R=0.865.
   clustering: "louvain"
   louvain_resolution: 1.5
 
-  # Выбор канонической новости в кластере.
+  # Choice of the canonical news item within a cluster.
   canonical: "earliest"   # earliest | longest
 
   seed: 42

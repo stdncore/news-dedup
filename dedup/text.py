@@ -1,4 +1,4 @@
-"""Нормализация русского текста для дедупликации."""
+"""Normalization of Russian text for deduplication."""
 from __future__ import annotations
 
 import re
@@ -18,7 +18,7 @@ _BULLET_RE = re.compile(r"[▪•▸►\-🟢🔴🔵🟡]\s?")
 
 
 def clean(text: str) -> str:
-    """Lowercase, убрать URL/упоминания/пунктуацию, схлопнуть пробелы."""
+    """Lowercase, strip URLs/mentions/punctuation, collapse whitespace."""
     t = (text or "").lower()
     t = _URL_RE.sub(" ", t)
     t = _NONWORD_RE.sub(" ", t)
@@ -27,12 +27,12 @@ def clean(text: str) -> str:
 
 
 def word_tokens(text: str) -> list[str]:
-    """Токены-слова для шинглов MinHash (на очищенном тексте)."""
+    """Word tokens for MinHash shingles (on cleaned text)."""
     return [tok.text for tok in tokenize(clean(text))]
 
 
 def is_digest(text: str) -> bool:
-    """True если пост — дайджест/сводка нескольких событий."""
+    """True if the post is a digest/summary of multiple events."""
     if _DIGEST_MARKERS.search(text):
         return True
     if len(_BULLET_RE.findall(text)) >= 3 and len(text) > 250:

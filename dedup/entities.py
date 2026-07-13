@@ -1,13 +1,13 @@
-"""Извлечение именованных сущностей (NER) через natasha для NE-gating.
+"""Named entity recognition (NER) via natasha, for NE-gating.
 
-Идея: два поста с похожими эмбеддингами, но разными сущностями (персоны,
-организации, локации) — это разные события с общим boilerplate-языком
-(агентские шаблоны ТАСС/Интерфакс), а не дубли. Совпадение хотя бы одной
-сущности — необходимое условие для семантического ребра в "серой зоне"
-косинуса.
+Idea: two posts with similar embeddings but different entities (persons,
+organizations, locations) are different events sharing boilerplate language
+(TASS/Interfax wire-service templates), not duplicates. A match on at least
+one entity is a necessary condition for a semantic edge in the "gray zone"
+of cosine similarity.
 
-Извлечение тяжёлое (slovnet-модель ~5 мин на 80k), поэтому кэшируется по id
-в .npz рядом с эмбеддингами.
+Extraction is heavy (slovnet model, ~5 min for 80k), so it's cached by id
+in a .npz file next to the embeddings.
 """
 from __future__ import annotations
 
@@ -17,15 +17,15 @@ os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
 
 import numpy as np
 
-# Метки сущностей, которые различают события. ORG специально не берём как
-# жёсткий сигнал в одиночку — агентства (ТАСС/РИА) сами ORG и зашумляют.
+# Entity labels that distinguish events. ORG is deliberately excluded as a
+# standalone hard signal — wire agencies (TASS/RIA) are themselves ORGs and add noise.
 _ENTITY_TYPES = {"PER", "LOC"}
 
 _MODELS = None
 
 
 def _load_models():
-    """Ленивая инициализация natasha (singleton): сегментер + NER + морфо."""
+    """Lazy natasha initialization (singleton): segmenter + NER + morphology."""
     global _MODELS
     if _MODELS is None:
         from natasha import (
@@ -47,10 +47,10 @@ def _load_models():
 
 
 def extract_entities(text: str) -> frozenset[str]:
-    """Множество нормализованных сущностей (PER, LOC) из текста, lower-case.
+    """Set of normalized entities (PER, LOC) from the text, lower-cased.
 
-    Нормализация (span.normal) приводит словоформы к лемме: "Собянина" и
-    "Собянин" → один токен, иначе морфология русского ломает пересечение.
+    Normalization (span.normal) reduces word forms to their lemma: "Собянина"
+    and "Собянин" -> one token; otherwise Russian morphology breaks the intersection.
     """
     if not text:
         return frozenset()
@@ -72,10 +72,10 @@ def build_entities(
     ids: list[str] | None = None,
     cache_path: str | None = None,
 ) -> list[frozenset[str]]:
-    """Сущности для каждого текста, с инкрементальным кэшем по id.
+    """Entities for each text, with an incremental cache keyed by id.
 
-    Без ids/cache_path — простой проход без кэша. Возвращает список в порядке
-    входа, элемент i — frozenset сущностей текста i.
+    Without ids/cache_path — a plain pass with no caching. Returns a list in
+    input order; element i is the frozenset of entities for text i.
     """
     if ids is None or cache_path is None:
         return [extract_entities(t) for t in texts]
@@ -97,7 +97,7 @@ def build_entities(
 
 
 def _save_cache(cache_path: str, cache: dict[str, frozenset[str]]) -> None:
-    """Атомарная запись: список сущностей через '|' разделитель в object-массиве."""
+    """Atomic write: entity list joined with '|' into an object array."""
     keys = list(cache.keys())
     vals = np.asarray(["|".join(sorted(cache[k])) for k in keys], dtype=object)
     tmp = f"{cache_path}.tmp.npz"
