@@ -1,9 +1,9 @@
-"""Оценка качества кластеризации по экспертной разметке пар.
+"""Evaluate clustering quality against expert-labeled pairs.
 
-Читает clusters.json (результат pipeline) и labeled_pairs.json,
-вычисляет pairwise Precision / Recall / F1 + ARI + структурные метрики.
+Reads clusters.json (pipeline output) and labeled_pairs.json,
+computes pairwise Precision / Recall / F1 + ARI + structural metrics.
 
-Запуск:
+Usage:
     python scripts/evaluate_quality.py
     python scripts/evaluate_quality.py --clusters clusters.json --pairs tests/fixtures/labeled_pairs.json
 """
@@ -30,17 +30,17 @@ def main() -> None:
         r["id"]: int(r["cluster_id"]) for r in result["per_news"]
     }
 
-    # Фильтруем пары где оба ID есть в результате
+    # Filter to pairs where both IDs are present in the result
     valid_pairs = [p for p in pairs if p["id1"] in id_to_cluster and p["id2"] in id_to_cluster]
     missing = len(pairs) - len(valid_pairs)
     if missing:
-        print(f"[warn] {missing} пар пропущено — ID не найдены в clusters.json")
+        print(f"[warn] {missing} pairs skipped — ID not found in clusters.json")
 
-    # Строим векторы меток для pairwise F1
+    # Build label vectors for pairwise F1
     true_labels, pred_labels = [], []
     tp = fp = fn = tn = 0
     for p in valid_pairs:
-        gold = int(p["label"])  # 1 = дубль, 0 = не дубль
+        gold = int(p["label"])  # 1 = duplicate, 0 = not a duplicate
         same = 1 if id_to_cluster[p["id1"]] == id_to_cluster[p["id2"]] else 0
         true_labels.append(gold)
         pred_labels.append(same)
@@ -57,31 +57,31 @@ def main() -> None:
     recall = tp / (tp + fn) if (tp + fn) else 0.0
     f1 = 2 * precision * recall / (precision + recall) if (precision + recall) else 0.0
 
-    # Структурные метрики по всем кластерам
+    # Structural metrics across all clusters
     all_labels = [int(r["cluster_id"]) for r in result["per_news"]]
     stats = cluster_size_stats(all_labels)
 
     print("=" * 50)
-    print("КАЧЕСТВО ПО ЭКСПЕРТНОЙ РАЗМЕТКЕ")
+    print("QUALITY AGAINST EXPERT LABELS")
     print("=" * 50)
-    print(f"Размеченных пар:   {len(valid_pairs)}  (из {len(pairs)})")
+    print(f"Labeled pairs:     {len(valid_pairs)}  (of {len(pairs)})")
     print(f"  TP={tp}  FP={fp}  FN={fn}  TN={tn}")
     print(f"  Precision: {precision:.4f}")
     print(f"  Recall:    {recall:.4f}")
     print(f"  F1:        {f1:.4f}")
     print()
-    print("СТРУКТУРНЫЕ МЕТРИКИ (100k)")
+    print("STRUCTURAL METRICS (100k)")
     print("=" * 50)
-    print(f"  Новостей:          {stats['n_items']:>7}")
-    print(f"  Кластеров:         {stats['n_clusters']:>7}")
-    print(f"  Синглтонов:        {stats['n_singletons']:>7}")
-    print(f"  Макс. кластер:     {stats['max_cluster']:>7}")
-    print(f"  Ср. размер:        {stats['mean_cluster']:>7.2f}")
+    print(f"  News items:        {stats['n_items']:>7}")
+    print(f"  Clusters:          {stats['n_clusters']:>7}")
+    print(f"  Singletons:        {stats['n_singletons']:>7}")
+    print(f"  Max cluster:       {stats['max_cluster']:>7}")
+    print(f"  Mean size:         {stats['mean_cluster']:>7.2f}")
     print(f"  Dedup rate:        {stats['dedup_rate']:>7.1%}")
     print()
 
-    # Итоговая строка для отчёта
-    print(f"Pairwise F1 = {f1:.4f}  |  dedup rate = {stats['dedup_rate']:.1%}  |  кластеров = {stats['n_clusters']}")
+    # Summary line for the report
+    print(f"Pairwise F1 = {f1:.4f}  |  dedup rate = {stats['dedup_rate']:.1%}  |  clusters = {stats['n_clusters']}")
 
 
 if __name__ == "__main__":

@@ -1,10 +1,10 @@
-"""Сбор постов из публичных telegram-каналов через Telethon (MTProto).
+"""Collect posts from public telegram channels via Telethon (MTProto).
 
-Инкрементальный: на канал хранится last_msg_id, докачиваются только новые посты.
-Маппинг сообщения -> единая схема (id, title, text, source, published_at).
+Incremental: last_msg_id is stored per channel, only new posts are fetched.
+Message mapping -> unified schema (id, title, text, source, published_at).
 
-Запуск:  python -m ingest.telegram --config config.yaml
-Креды берутся из .env (TG_API_ID, TG_API_HASH, TG_SESSION).
+Run:  python -m ingest.telegram --config config.yaml
+Credentials come from .env (TG_API_ID, TG_API_HASH, TG_SESSION).
 """
 from __future__ import annotations
 
@@ -27,7 +27,7 @@ from .store import (
 
 
 def _split_title_text(raw: str) -> tuple[str, str]:
-    """Заголовок = первая непустая строка поста, text = весь пост."""
+    """Title = first non-empty line of the post, text = the whole post."""
     text = (raw or "").strip()
     first_line = next((ln.strip() for ln in text.splitlines() if ln.strip()), "")
     return first_line[:300], text
@@ -41,7 +41,7 @@ def _norm_source(channel: str) -> str:
 
 
 def _message_to_item(msg: Message, source: str) -> NewsItem | None:
-    raw = msg.message  # текст поста; None у чисто-медийных постов
+    raw = msg.message  # post text; None for media-only posts
     if not raw or not raw.strip():
         return None
     title, text = _split_title_text(raw)
@@ -50,7 +50,7 @@ def _message_to_item(msg: Message, source: str) -> NewsItem | None:
         title=title,
         text=text,
         source=source,
-        published_at=msg.date,  # Telethon отдаёт aware UTC datetime
+        published_at=msg.date,  # Telethon returns an aware UTC datetime
     )
 
 
@@ -72,8 +72,8 @@ def collect(config: dict) -> int:
             items: list[NewsItem] = []
             max_seen = last_id
 
-            # min_id=last_id -> только сообщения новее чекпоинта (инкремент).
-            # limit ограничивает первый (полный) проход.
+            # min_id=last_id -> only messages newer than the checkpoint (incremental).
+            # limit caps the first (full) pass.
             for msg in client.iter_messages(
                 channel, limit=history_limit, min_id=last_id
             ):

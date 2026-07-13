@@ -1,14 +1,15 @@
-"""Экспорт таблицы news из SQLite в JSON-фикстуру для воспроизводимой проверки.
+"""Export the news table from SQLite to a JSON fixture for reproducible verification.
 
-news.db в git не попадает (gitignore) и зависит от момента сбора — запуск
-ingest позже даст другие новости. Фикстура замораживает конкретный набор,
-чтобы работодатель прогнал `python -m dedup.pipeline --input <fixture>` и
-получил ровно тот же clusters.json, что и мы.
+news.db is not tracked in git (gitignored) and depends on when it was
+collected — running ingest again later would produce different news.
+The fixture freezes a specific dataset so an employer can run
+`python -m dedup.pipeline --input <fixture>` and get exactly the same
+clusters.json that we did.
 
-Схема совпадает с tests/fixtures/news_sample.json:
+Schema matches tests/fixtures/news_sample.json:
     [{id, title, text, source, published_at}, ...]
 
-Запуск:
+Usage:
     python scripts/export_fixture.py --db news.db \
         --out tests/fixtures/news_100k.json --limit 100000
 """
@@ -23,7 +24,7 @@ import sqlite3
 def export(db_path: str, out_path: str, limit: int | None) -> None:
     conn = sqlite3.connect(db_path)
     try:
-        # ORDER BY id -> детерминированный порядок независимо от вставки.
+        # ORDER BY id -> deterministic order regardless of insertion.
         sql = "SELECT id, title, text, source, published_at FROM news ORDER BY id"
         if limit:
             sql += f" LIMIT {int(limit)}"
@@ -34,7 +35,7 @@ def export(db_path: str, out_path: str, limit: int | None) -> None:
     cols = ["id", "title", "text", "source", "published_at"]
     data = [dict(zip(cols, r)) for r in rows]
 
-    # Канонический JSON (sort_keys) -> стабильный SHA при одинаковых данных.
+    # Canonical JSON (sort_keys) -> stable SHA for identical data.
     payload = json.dumps(data, ensure_ascii=False, sort_keys=True, indent=2)
     with open(out_path, "w", encoding="utf-8") as f:
         f.write(payload)

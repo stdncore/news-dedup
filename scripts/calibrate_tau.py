@@ -1,13 +1,13 @@
-"""Калибровка порога косинуса tau на размеченных парах.
+"""Calibrate the cosine threshold tau on labeled pairs.
 
-Алгоритм:
-  1. Загружает fixture + labeled_pairs.
-  2. Вычисляет эмбеддинги один раз (кешируется в embeddings_cache.npy).
-  3. Строит ANN-соседей один раз.
-  4. Для каждого tau из сетки: строит рёбра -> кластеры -> pairwise F1 по меткам.
-  5. Выводит таблицу и рекомендует лучший tau.
+Algorithm:
+  1. Load the fixture + labeled_pairs.
+  2. Compute embeddings once (cached in embeddings_cache.npy).
+  3. Build ANN neighbors once.
+  4. For each tau in the grid: build edges -> clusters -> pairwise F1 against labels.
+  5. Print a table and recommend the best tau.
 
-Запуск:
+Usage:
     python scripts/calibrate_tau.py
     python scripts/calibrate_tau.py --taus 0.75 0.80 0.85 0.90 0.95
 """
@@ -39,9 +39,9 @@ def get_embeddings(posts: list[dict], cfg: dict) -> np.ndarray:
     if EMB_CACHE.exists():
         emb = np.load(EMB_CACHE)
         if emb.shape[0] == len(posts):
-            print(f"Загружены эмбеддинги из кеша {EMB_CACHE} ({emb.shape})")
+            print(f"Loaded embeddings from cache {EMB_CACHE} ({emb.shape})")
             return emb
-        print("Кеш устарел (размер не совпадает), пересчитываем...")
+        print("Cache is stale (size mismatch), recomputing...")
 
     from dedup.embed import build_embeddings
 
@@ -58,7 +58,7 @@ def get_embeddings(posts: list[dict], cfg: dict) -> np.ndarray:
         seed=dcfg.get("seed", 42),
     )
     np.save(EMB_CACHE, emb)
-    print(f"Эмбеддинги сохранены в {EMB_CACHE} ({emb.shape})")
+    print(f"Embeddings saved to {EMB_CACHE} ({emb.shape})")
     return emb
 
 
@@ -114,18 +114,18 @@ def main() -> None:
     ap.add_argument("--fixture", default=str(FIXTURE))
     ap.add_argument("--labels", default=str(LABELS_FILE))
     ap.add_argument("--test-ratio", type=float, default=0.3,
-                    help="Доля пар для held-out теста (0 = без split, все пары = train)")
+                    help="Fraction of pairs held out for testing (0 = no split, all pairs go to train)")
     args = ap.parse_args()
 
     cfg = yaml.safe_load(Path(args.config).read_text(encoding="utf-8"))
     dcfg = cfg["dedup"]
 
     posts = load_fixture_filtered(Path(args.fixture))
-    print(f"Постов после фильтра: {len(posts)}")
+    print(f"Posts after filtering: {len(posts)}")
 
     labeled = json.loads(Path(args.labels).read_text(encoding="utf-8"))
     n_dup = sum(r["label"] for r in labeled)
-    print(f"Размеченных пар: {len(labeled)}  (дублей: {n_dup}, не-дублей: {len(labeled)-n_dup})")
+    print(f"Labeled pairs: {len(labeled)}  (duplicates: {n_dup}, non-duplicates: {len(labeled)-n_dup})")
 
     if args.test_ratio > 0:
         import random
@@ -135,11 +135,11 @@ def main() -> None:
         split = int(len(shuffled) * (1 - args.test_ratio))
         train_pairs = shuffled[:split]
         test_pairs = shuffled[split:]
-        print(f"Train пар: {len(train_pairs)}, Test пар: {len(test_pairs)}")
+        print(f"Train pairs: {len(train_pairs)}, Test pairs: {len(test_pairs)}")
     else:
         train_pairs = labeled
         test_pairs = None
-        print("Split отключён (--test-ratio 0): все пары идут в train")
+        print("Split disabled (--test-ratio 0): all pairs go to train")
 
     id2pos = {p["id"]: i for i, p in enumerate(posts)}
 
@@ -163,18 +163,18 @@ def main() -> None:
         hnsw_m=ann.get("hnsw_m", 32),
         ef_search=ann.get("ef_search", 64),
     )
-    print(f"ANN готов. Сетка tau: {args.taus}\n")
+    print(f"ANN ready. Tau grid: {args.taus}\n")
 
     tw = dcfg.get("time_window_hours", 72)
 
-    # Grid search на train_pairs
+    # Grid search over train_pairs
     results = []
     for tau in args.taus:
         r = eval_tau(tau, sims, idx, published, tw, id2pos, train_pairs)
         results.append(r)
 
-    header = f"{'tau':>6}  {'F1':>6}  {'P':>6}  {'R':>6}  {'TP':>4}  {'FP':>4}  {'FN':>4}  {'кластеров':>10}  {'рёбер':>7}"
-    print(f"\n--- TRAIN ({len(train_pairs)} пар) ---")
+    header = f"{'tau':>6}  {'F1':>6}  {'P':>6}  {'R':>6}  {'TP':>4}  {'FP':>4}  {'FN':>4}  {'clusters':>10}  {'edges':>7}"
+    print(f"\n--- TRAIN ({len(train_pairs)} pairs) ---")
     print(header)
     print("-" * 72)
     best = max(results, key=lambda r: r["f1"])
@@ -185,20 +185,20 @@ def main() -> None:
             f"  {r['tp']:>4}  {r['fp']:>4}  {r['fn']:>4}  {r['n_clusters']:>10}  {r['n_edges']:>7}{marker}"
         )
 
-    print(f"\nЛучший tau на train = {best['tau']}  (F1={best['f1']:.3f})")
+    print(f"\nBest tau on train = {best['tau']}  (F1={best['f1']:.3f})")
 
     if test_pairs:
         final = eval_tau(best["tau"], sims, idx, published, tw, id2pos, test_pairs)
-        print(f"\n--- HELD-OUT TEST ({len(test_pairs)} пар) ---")
+        print(f"\n--- HELD-OUT TEST ({len(test_pairs)} pairs) ---")
         print(header)
         print("-" * 72)
         print(
             f"{final['tau']:>6.2f}  {final['f1']:>6.3f}  {final['precision']:>6.3f}  {final['recall']:>6.3f}"
             f"  {final['tp']:>4}  {final['fp']:>4}  {final['fn']:>4}  {final['n_clusters']:>10}  {final['n_edges']:>7}"
         )
-        print(f"\nФинальный (held-out) F1 = {final['f1']:.3f}  P={final['precision']:.3f}  R={final['recall']:.3f}")
+        print(f"\nFinal (held-out) F1 = {final['f1']:.3f}  P={final['precision']:.3f}  R={final['recall']:.3f}")
 
-    print(f"\nОбнови config.yaml: cosine_threshold: {best['tau']}")
+    print(f"\nUpdate config.yaml: cosine_threshold: {best['tau']}")
 
 
 if __name__ == "__main__":

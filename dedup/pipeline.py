@@ -1,7 +1,7 @@
-"""Оркестрация дедупликации: SQLite -> пре-фильтр -> эмбеддинги -> ANN ->
-граф -> кластеры -> каноническая -> JSON.
+"""Dedup orchestration: SQLite -> prefilter -> embeddings -> ANN ->
+graph -> clusters -> canonical -> JSON.
 
-Запуск:  python -m dedup.pipeline --config config.yaml
+Usage:  python -m dedup.pipeline --config config.yaml
 """
 from __future__ import annotations
 
@@ -28,7 +28,7 @@ from .text import is_digest
 
 
 def _log_rss(phase: str) -> None:
-    """Пиковая RSS после фазы. macOS отдаёт байты, Linux — килобайты."""
+    """Peak RSS after a phase. macOS reports bytes, Linux reports kilobytes."""
     rss = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     mb = rss / (1024 ** 2) if sys.platform == "darwin" else rss / 1024
     print(f"[mem] после {phase}: peak RSS {mb:.0f} MB")
@@ -52,7 +52,7 @@ def load_news(db_path: str) -> pd.DataFrame:
 
 
 def load_fixture(path: str) -> pd.DataFrame:
-    # .gz поддержан: фикстура 100k в репозитории хранится сжатой (133MB -> 31MB).
+    # .gz is supported: the 100k fixture is kept compressed in the repo (133MB -> 31MB).
     if path.endswith(".gz"):
         import gzip
 
@@ -68,7 +68,7 @@ def load_fixture(path: str) -> pd.DataFrame:
     before = len(df)
     df = df[~df["text"].apply(is_digest)].reset_index(drop=True)
     print(f"Фильтр дайджестов: убрано {before - len(df)} постов, осталось {len(df)}")
-    # Фильтр постов где текст — только URL (без содержательного контента).
+    # Filter out posts whose text is just a URL (no substantive content).
     import re as _re
     _url_only = _re.compile(r"^https?://\S+$")
     before = len(df)
@@ -94,7 +94,7 @@ def run(config: dict, df: pd.DataFrame | None = None, input_file: str | None = N
     published = [d.to_pydatetime() for d in df["published_at"]]
     text_len = df["text"].str.len().tolist()
 
-    # 1) Лексический пре-фильтр -> достоверные рёбра.
+    # 1) Lexical prefilter -> high-confidence edges.
     pf = cfg.get("prefilter", {})
     lex = []
     if pf.get("enabled", True):
@@ -104,10 +104,10 @@ def run(config: dict, df: pd.DataFrame | None = None, input_file: str | None = N
             jaccard_threshold=pf.get("jaccard_threshold", 0.7),
             shingle_size=pf.get("shingle_size", 5),
         )
-        # Доля пар к n — сигнал blowup'а на boilerplate (агентские футеры).
+        # Ratio of pairs to n is a signal of blowup on boilerplate (wire-service footers).
         print(f"Лексический пре-фильтр: {len(lex)} рёбер ({len(lex) / max(n, 1):.2f}/новость)")
 
-    # 2) Эмбеддинги (инкрементальный кэш по id переживает краш прогона).
+    # 2) Embeddings (incremental cache keyed by id survives a crashed run).
     emb = build_embeddings(
         titles,
         texts,
@@ -121,7 +121,7 @@ def run(config: dict, df: pd.DataFrame | None = None, input_file: str | None = N
     )
     _log_rss("эмбеддинги")
 
-    # 3) ANN + 4/5) рёбра по порогу косинуса и окну времени.
+    # 3) ANN + 4/5) edges by cosine threshold and time window.
     ann = cfg.get("ann", {})
     sims, idx = ann_neighbors(
         emb,
@@ -139,10 +139,10 @@ def run(config: dict, df: pd.DataFrame | None = None, input_file: str | None = N
     )
     print(f"Семантические рёбра: {len(sem_w)}")
 
-    # 6) Кластеризация графа рёбер.
-    # Lexical edges тоже фильтруем по времени: boilerplate-заголовки (ТАСС, Интерфакс)
-    # иначе склеят события, разнесённые на месяцы. Лексическим рёбрам даём
-    # высокий вес (1.0) — это высокоточные MinHash-совпадения.
+    # 6) Cluster the edge graph.
+    # Lexical edges are also filtered by time: boilerplate headlines (TASS, Interfax)
+    # would otherwise merge events months apart. Lexical edges get a high
+    # weight (1.0) — these are high-precision MinHash matches.
     tw = tw_hours * 3600.0
     ts = [d.timestamp() for d in published]
     lex = [(i, j) for i, j in lex if abs(ts[i] - ts[j]) <= tw]
@@ -165,7 +165,7 @@ def run(config: dict, df: pd.DataFrame | None = None, input_file: str | None = N
     df = df.copy()
     df["cluster_id"] = labels
 
-    # 7) Каноническая новость на кластер.
+    # 7) Canonical news item per cluster.
     canon = pick_canonical(
         labels, published, text_len, strategy=cfg.get("canonical", "earliest")
     )
@@ -174,7 +174,7 @@ def run(config: dict, df: pd.DataFrame | None = None, input_file: str | None = N
     n_clusters = len(set(labels.tolist()))
     print(f"Новостей: {n}  кластеров: {n_clusters}  дублей убрано: {n - n_clusters}")
 
-    # 8) Вывод.
+    # 8) Output.
     _write_output(df, cfg.get("output", "clusters.json"))
     return df
 

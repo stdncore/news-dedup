@@ -1,11 +1,11 @@
-"""Лексический пре-фильтр near-дублей через MinHash + LSH (datasketch).
+"""Lexical pre-filter for near-duplicates via MinHash + LSH (datasketch).
 
-Дешёвый recall-ориентированный кандидат-генератор: ловит копипаст и
-почти-идентичные тексты до семантического этапа. Конфиг по продакшн-эталону
-HuggingFace: 256 перестановок, Jaccard 0.7, 5-словные шинглы.
+A cheap recall-oriented candidate generator: catches copy-paste and
+near-identical texts before the semantic stage. Config follows the
+production HuggingFace reference: 256 permutations, Jaccard 0.7, 5-word shingles.
 
-Возвращает рёбра (i, j) — пары индексов-кандидатов, которые затем напрямую
-склеиваются в граф (лексические дубли считаем достоверными).
+Returns edges (i, j) - candidate index pairs, which are then merged directly
+into the graph (lexical duplicates are considered reliable).
 """
 from __future__ import annotations
 
@@ -33,7 +33,7 @@ def lexical_edges(
     jaccard_threshold: float = 0.7,
     shingle_size: int = 5,
 ) -> list[tuple[int, int]]:
-    """Пары индексов с оценочным Jaccard >= порога."""
+    """Index pairs with estimated Jaccard >= threshold."""
     lsh = MinHashLSH(threshold=jaccard_threshold, num_perm=num_perm)
     minhashes: list[MinHash] = []
     for i, text in enumerate(texts):

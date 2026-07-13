@@ -1,7 +1,7 @@
-"""SQLite-хранилище собранных новостей.
+"""SQLite storage for collected news.
 
-Единая схema под задачу дедупликации: id, title, text, source, published_at.
-PK по id обеспечивает идемпотентный upsert — повторный сбор не плодит дубли.
+Unified schema for the deduplication task: id, title, text, source, published_at.
+PK on id ensures an idempotent upsert — re-ingestion does not create duplicates.
 """
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS news (
 );
 CREATE INDEX IF NOT EXISTS idx_news_published ON news(published_at);
 
--- Чекпоинт инкрементального сбора: последний обработанный msg_id на канал.
+-- Checkpoint for incremental ingestion: last processed msg_id per channel.
 CREATE TABLE IF NOT EXISTS ingest_state (
     source      TEXT PRIMARY KEY,
     last_msg_id INTEGER NOT NULL

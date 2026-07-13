@@ -1,10 +1,10 @@
-"""Integration-тесты с реальной моделью.
+"""Integration tests with the real model.
 
-Требуют скачанной модели deepvk/USER-bge-m3 (~560 MB).
-Запуск: pytest tests/test_integration.py -m integration -v
+Require the deepvk/USER-bge-m3 model to be downloaded (~560 MB).
+Run: pytest tests/test_integration.py -m integration -v
 
-Маркируются @pytest.mark.integration и пропускаются в CI по умолчанию.
-Используй conftest.py или pytest.ini для регистрации маркера.
+Marked with @pytest.mark.integration and skipped in CI by default.
+Use conftest.py or pytest.ini to register the marker.
 """
 from __future__ import annotations
 
@@ -22,10 +22,11 @@ pytest.importorskip("sentence_transformers", reason="sentence-transformers not i
 
 @pytest.mark.integration
 def test_real_model_known_duplicates():
-    """Пары с label=1 должны иметь cosine > 0.80 на реальной модели.
+    """Pairs with label=1 should have cosine > 0.80 on the real model.
 
-    Проверяет что query_prefix="" даёт корректное сходство для doc-doc задачи.
-    Если косинус < порога — возможен неверный query_prefix или деградация модели.
+    Verifies that query_prefix="" gives correct similarity for the doc-doc task.
+    If the cosine is below the threshold, the query_prefix may be wrong or the
+    model may have degraded.
     """
     import yaml
     from dedup.embed import build_embeddings
@@ -33,16 +34,16 @@ def test_real_model_known_duplicates():
     posts = json.loads(FIXTURE.read_text(encoding="utf-8"))
     labeled = json.loads(LABELS.read_text(encoding="utf-8"))
 
-    # Берём 5 позитивных пар (label=1)
+    # Take 5 positive pairs (label=1)
     pos_pairs = [p for p in labeled if p["label"] == 1][:5]
-    assert pos_pairs, "Нет позитивных пар в labeled_pairs.json"
+    assert pos_pairs, "No positive pairs in labeled_pairs.json"
 
-    # Собираем нужные id
+    # Collect the needed ids
     needed_ids = {p["id1"] for p in pos_pairs} | {p["id2"] for p in pos_pairs}
     id2post = {p["id"]: p for p in posts if p["id"] in needed_ids}
     missing = needed_ids - set(id2post)
     if missing:
-        pytest.skip(f"Посты из labeled_pairs не найдены в fixture: {missing}")
+        pytest.skip(f"Posts from labeled_pairs not found in fixture: {missing}")
 
     cfg = yaml.safe_load(Path("config.yaml").read_text(encoding="utf-8"))["dedup"]
 
@@ -69,7 +70,7 @@ def test_real_model_known_duplicates():
             failed.append((pair["id1"], pair["id2"], sim))
 
     assert not failed, (
-        f"Следующие позитивные пары имеют cosine < {threshold} — "
-        f"возможен неверный query_prefix или деградация модели:\n"
+        f"The following positive pairs have cosine < {threshold} — "
+        f"the query_prefix may be wrong or the model may have degraded:\n"
         + "\n".join(f"  {a} <-> {b}: {s:.3f}" for a, b, s in failed)
     )

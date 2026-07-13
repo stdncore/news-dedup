@@ -1,8 +1,8 @@
-"""Скрапинг публичных telegram-каналов через t.me/s/<channel> (без кредов).
+"""Scrapes public telegram channels via t.me/s/<channel> (no credentials needed).
 
-Сохраняет posts в tests/fixtures/news_sample.json в схеме дедупа.
+Saves posts to tests/fixtures/news_sample.json in the dedup schema.
 
-Запуск:
+Usage:
     python scripts/scrape_fixture.py
     python scripts/scrape_fixture.py --channels meduzalive rian_ru bbcrussian --limit 150
 """
@@ -76,7 +76,7 @@ def scrape_channel(username: str, limit: int = 150) -> list[dict]:
         if not ids_this_page:
             break
         before = min(ids_this_page)
-        time.sleep(0.5)  # вежливая пауза
+        time.sleep(0.5)  # polite delay
 
     return posts[:limit]
 

@@ -1,103 +1,103 @@
-# News Dedup — семантическая дедупликация русских новостей
+# News Dedup — semantic deduplication of Russian news
 
-Группирует публикации об одном событии из разных источников, выбирает каноническую и возвращает кластеры `group_id → [news_id]`. Масштабируется на 100k+.
+Groups publications about the same event from different sources, picks a canonical one, and returns clusters `group_id → [news_id]`. Scales to 100k+.
 
-## Результаты
+## Results
 
-### 100k постов (27 Telegram-каналов)
+### 100k posts (27 Telegram channels)
 
-| Метрика | Значение |
+| Metric | Value |
 |---|---|
-| Постов на входе | 100 000 |
-| После фильтров (дайджесты + URL-only) | 77 482 |
-| Кластеров (событий) | 56 687 |
-| Дублей убрано | 20 795 (27%) |
-| Макс. кластер | 232 |
-| **Pairwise F1 (экспертная разметка, 289 пар)** | **0.833** |
+| Input posts | 100,000 |
+| After filters (digests + URL-only) | 77,482 |
+| Clusters (events) | 56,687 |
+| Duplicates removed | 20,795 (27%) |
+| Max cluster | 232 |
+| **Pairwise F1 (expert labeling, 289 pairs)** | **0.833** |
 | Pairwise Precision | 0.854 |
 | Pairwise Recall | 0.814 |
 
-Оценка по `scripts/evaluate_quality.py` на 289 экспертно-размеченных парах (332 пар total,
-из которых 3 не найдены в fixture, 40 авто-размечены по правилу Δt>24ч).
-Разметка покрывает серую зону косинуса [0.76, 0.84] через `scripts/generate_label_candidates.py`.
+Evaluated with `scripts/evaluate_quality.py` on 289 expert-labeled pairs (332 pairs total,
+of which 3 were not found in the fixture, 40 auto-labeled by the rule Δt>24h).
+Labeling covers the cosine gray zone [0.76, 0.84] via `scripts/generate_label_candidates.py`.
 
-Воспроизведение: `python -m dedup.pipeline --input tests/fixtures/news_100k.json.gz` →
+Reproduce: `python -m dedup.pipeline --input tests/fixtures/news_100k.json.gz` →
 `python scripts/evaluate_quality.py`.
 
-### Малая выборка (1500 постов, отладка)
+### Small sample (1500 posts, debugging)
 
-| Метрика | Значение |
+| Metric | Value |
 |---|---|
-| Постов после фильтра | 1168 |
-| Pairwise F1 — held-out (65 пар) | 1.000 |
+| Posts after filter | 1168 |
+| Pairwise F1 — held-out (65 pairs) | 1.000 |
 
-## Подход
+## Approach
 
-### Пайплайн
+### Pipeline
 
 ```
-Telegram-каналы → Ingest (Telethon → SQLite)
+Telegram channels → Ingest (Telethon → SQLite)
                         │
-                  Фильтр дайджестов   ← regex + bullet-эвристика
+                  Digest filter        ← regex + bullet heuristic
                         │
-              MinHash/LSH пре-фильтр  ← Jaccard ≥ 0.7, 5-gram, 256 perm
+             MinHash/LSH prefilter     ← Jaccard ≥ 0.7, 5-gram, 256 perm
                         │
-             Эмбеддинги (USER-bge-m3) ← 1024-dim, L2-norm
+             Embeddings (USER-bge-m3)  ← 1024-dim, L2-norm
                         │
-                  FAISS ANN            ← top-20 соседей по косинусу
+                  FAISS ANN            ← top-20 cosine neighbors
                         │
-             Граф рёбер: cosine ≥ 0.78 AND Δt ≤ 24h
+             Edge graph: cosine ≥ 0.78 AND Δt ≤ 24h
                         │
-            Louvain communities        ← режет транзитивные мостики
+            Louvain communities        ← cuts transitive bridges
                         │
           Canonical: earliest pub_date
                         │
                   clusters.json
 ```
 
-### Ключевые решения
+### Key decisions
 
-**Модель: `deepvk/USER-bge-m3`** — лучший результат на RusBEIR (NDCG@10 61.13) и кластеризации новостей (AMI 0.84) среди открытых русскоязычных моделей.
+**Model: `deepvk/USER-bge-m3`** — best result on RusBEIR (NDCG@10 61.13) and news clustering (AMI 0.84) among open Russian-language models.
 
-**Кластеризация: Louvain communities** — вместо connected components. На 100k connected-components слипает соседние события в мегакластер через транзитивные цепочки похожих постов (max-кластер 1720). Louvain оптимизирует модулярность взвешенного графа (вес = косинус) и режет слабые мостики. Max-кластер 1720 → 232. Connected components доступен через `clustering: connected_components`.
+**Clustering: Louvain communities** — instead of connected components. At 100k, connected components merge neighboring events into a mega-cluster via transitive chains of similar posts (max cluster 1720). Louvain optimizes modularity of the weighted graph (weight = cosine) and cuts weak bridges. Max cluster 1720 → 232. Connected components remain available via `clustering: connected_components`.
 
-**Параметры tau=0.78, time_window=24h** откалиброваны итеративно на 332 размеченных парах (`scripts/generate_label_candidates.py` — серая зона [0.76, 0.84]). Окно 24ч убирает шаблонные ежедневные сводки (ковид-статистика, ночные БПЛА-сводки), которые имеют высокий косинус но разные события.
+**Parameters tau=0.78, time_window=24h** were calibrated iteratively on 332 labeled pairs (`scripts/generate_label_candidates.py` — gray zone [0.76, 0.84]). The 24h window removes template daily digests (covid stats, nightly drone-strike roundups) that have high cosine similarity but are different events.
 
-**Фильтр дайджестов** — удаляет сводки и радио-анонсы (regex + bullet-count), которые не являются новостями и создают ложные кластеры.
+**Digest filter** — removes roundups and radio announcements (regex + bullet-count) that aren't news and create false clusters.
 
-### Ограничения
+### Limitations
 
-- `USER-bge-m3` обрезает вход на ~512 токенах; для длинных статей — `deepvk/USER2-base` (8192 токенов).
-- Транзитивность компонент может склеить цепочку похожих (но не одинаковых) новостей — контролируется порогом и временным окном.
-- ANN (HNSW) приближённый: дубли вне top-k не найдутся (повысить `ann.top_k` / `ef_search`).
+- `USER-bge-m3` truncates input at ~512 tokens; for long articles use `deepvk/USER2-base` (8192 tokens).
+- Component transitivity can merge a chain of similar (but not identical) news items — controlled via the threshold and time window.
+- ANN (HNSW) is approximate: duplicates outside top-k won't be found (raise `ann.top_k` / `ef_search`).
 
-## Установка
+## Setup
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
 pip install -e .
-cp .env.example .env   # TG_API_ID, TG_API_HASH (my.telegram.org) — только для Telegram ingest
+cp .env.example .env   # TG_API_ID, TG_API_HASH (my.telegram.org) — only for Telegram ingest
 ```
 
-## Запуск
+## Running
 
-### На fixture-данных (без Telegram API)
+### On fixture data (no Telegram API)
 
 ```bash
-# macOS: обход конфликта OpenMP между torch и faiss
+# macOS: work around the OpenMP conflict between torch and faiss
 OMP_NUM_THREADS=1 python -m dedup.pipeline \
     --config config.yaml \
     --input tests/fixtures/news_sample.json
 ```
 
-### Полный цикл через Telegram API
+### Full cycle via Telegram API
 
 ```bash
-python -m ingest.telegram --config config.yaml   # сбор → news.db
+python -m ingest.telegram --config config.yaml   # collect → news.db
 OMP_NUM_THREADS=1 python -m dedup.pipeline --config config.yaml
 ```
 
-Выход `clusters.json`:
+`clusters.json` output:
 ```json
 {
   "clusters": {
@@ -110,26 +110,26 @@ OMP_NUM_THREADS=1 python -m dedup.pipeline --config config.yaml
 }
 ```
 
-### Сбор fixture + разметка + калибровка tau
+### Fixture collection + labeling + tau calibration
 
 ```bash
-python scripts/scrape_fixture.py --limit 300        # без TG-кредов
-python scripts/label_pairs.py                        # интерактивная разметка
-OMP_NUM_THREADS=1 python scripts/calibrate_tau.py   # → лучший tau
+python scripts/scrape_fixture.py --limit 300        # no TG creds needed
+python scripts/label_pairs.py                        # interactive labeling
+OMP_NUM_THREADS=1 python scripts/calibrate_tau.py   # → best tau
 ```
 
-### Тесты
+### Tests
 
 ```bash
 pytest tests/
 ```
 
-## Конфигурация
+## Configuration
 
 ```yaml
 dedup:
   model: "deepvk/USER-bge-m3"
-  cosine_threshold: 0.75   # откалибровано по labeled_pairs (F1=0.978)
+  cosine_threshold: 0.75   # calibrated on labeled_pairs (F1=0.978)
   time_window_hours: 72
   canonical: "earliest"    # earliest | longest
   prefilter:
@@ -143,55 +143,55 @@ dedup:
     ef_search: 64
 ```
 
-## Масштабируемость
+## Scalability
 
-| n постов | Шаг | Сложность |
+| n posts | Step | Complexity |
 |---|---|---|
-| 100k | Эмбеддинги (batch=64, CPU) | O(n), ~15 мин |
-| 100k | FAISS HNSW top-20 | O(n log n), ~10 сек |
-| 100k | MinHash LSH | O(n), ~30 сек |
-| 100k | Connected components | O(n·k), мгновенно |
+| 100k | Embeddings (batch=64, CPU) | O(n), ~15 min |
+| 100k | FAISS HNSW top-20 | O(n log n), ~10 sec |
+| 100k | MinHash LSH | O(n), ~30 sec |
+| 100k | Connected components | O(n·k), instant |
 
-При n ≤ 50k используется `IndexFlatIP` (точный, стабильный); при n > 50k — `IndexHNSWFlat`.
+For n ≤ 50k, `IndexFlatIP` is used (exact, stable); for n > 50k — `IndexHNSWFlat`.
 
-## Датасет
+## Dataset
 
-Fixture: `tests/fixtures/news_sample.json`  
-SHA-256: `af1a470fd14fe85e0c62169ef556b0001549ba7532791f3f45eb7868c9770a60`  
-Скрейп: 2026-06-18, по 300 постов на канал
+Fixture: `tests/fixtures/news_sample.json`
+SHA-256: `af1a470fd14fe85e0c62169ef556b0001549ba7532791f3f45eb7868c9770a60`
+Scraped: 2026-06-18, 300 posts per channel
 
-| Канал | Постов |
+| Channel | Posts |
 |---|---|
 | @interfaxonline | 300 |
 | @kommersant | 300 |
 | @rbc_news | 300 |
 | @tass_agency | 300 |
 | @vedomosti | 300 |
-| **Итого** | **1500** |
+| **Total** | **1500** |
 
-## Структура
+## Structure
 
 ```
 ingest/
-  store.py          SQLite: схема, upsert, checkpoint
-  telegram.py       Telethon MTProto → SQLite (инкрементально)
+  store.py          SQLite: schema, upsert, checkpoint
+  telegram.py       Telethon MTProto → SQLite (incremental)
 dedup/
   text.py           clean(), word_tokens(), is_digest()
-  prefilter.py      MinHash/LSH лексический пре-фильтр
+  prefilter.py      MinHash/LSH lexical prefilter
   embed.py          sentence-transformers → L2-norm
   cluster.py        FAISS ANN + build_edges + connected_clusters + canonical
   eval.py           pairwise P/R/F1, ARI, cluster_size_stats
-  pipeline.py       оркестратор + вывод
+  pipeline.py       orchestrator + output
 scripts/
-  scrape_fixture.py       t.me/s/<channel> без авторизации
-  label_pairs.py          интерактивная разметка пар
-  calibrate_tau.py        grid search косинусного порога (с held-out split)
-  audit_digest_filter.py  интерактивный аудит FP-rate digest-фильтра
+  scrape_fixture.py       t.me/s/<channel> without auth
+  label_pairs.py          interactive pair labeling
+  calibrate_tau.py        cosine threshold grid search (with held-out split)
+  audit_digest_filter.py  interactive FP-rate audit of the digest filter
 tests/
-  test_smoke.py           offline unit-тесты (F1=1.0, time window, lexical boilerplate)
-  test_integration.py     integration-тесты с реальной моделью (pytest -m integration)
+  test_smoke.py           offline unit tests (F1=1.0, time window, lexical boilerplate)
+  test_integration.py     integration tests with the real model (pytest -m integration)
   fixtures/
-    news_sample.json      1500 постов, 5 каналов
-    labeled_pairs.json    214 размеченных пар
-config.yaml         пороги, каналы, параметры модели
+    news_sample.json      1500 posts, 5 channels
+    labeled_pairs.json    214 labeled pairs
+config.yaml         thresholds, channels, model parameters
 ```
